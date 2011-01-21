@@ -4,6 +4,9 @@
 
 == DESCRIPTION
 
+PostgreSQL only database-level audit logging of all databases changes using a completely transparent stored procedure and triggers.
+Comes with specs for your project and a rake task to generate the reverse SQL to undo changes logged}
+
 All SQL INSERTs, UPDATEs, and DELETEs will be captured. Record columns that do not change do not generate an audit log entry.
 
 == INSTALL
