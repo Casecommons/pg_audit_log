@@ -1,5 +1,9 @@
+CREATE SEQUENCE audit_log_id_seq
+    START WITH 1
+    INCREMENT BY 1;
+
 CREATE TABLE audit_log (
-    id integer NOT NULL,
+    id integer PRIMARY KEY DEFAULT nextval('audit_log_id_seq'),
     user_id integer,
     user_unique_name character varying(255),
     operation character varying(255),
@@ -11,14 +15,4 @@ CREATE TABLE audit_log (
     primary_key character varying(255)
 );
 
-CREATE SEQUENCE audit_log_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
 ALTER SEQUENCE audit_log_id_seq OWNED BY audit_log.id;
-
-ALTER TABLE ONLY audit_log
-    ADD CONSTRAINT audit_log_pkey PRIMARY KEY (id);

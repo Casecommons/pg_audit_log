@@ -1,0 +1,57 @@
+= pg_audit_log
+
+* http://github.com/casecommons/pg_audit_log/
+
+== DESCRIPTION
+
+All SQL INSERTs, UPDATEs, and DELETEs will be captured. Record columns that do not change do not generate an audit log entry.
+
+== INSTALL
+
+=== Enable custom variables in your postgresql instance
+
+  To enable auditing you need to set a variable in your postgresql.conf file:
+
+  For macports: /opt/local/var/db/postgresql84/defaultdb/postgresql.conf
+  For homebrew: /usr/local/var/postgres/postgresql.conf
+  For linux: it varies from distro to distro.
+
+  At the bottom of the file add the following:
+
+    custom_variable_classes = 'audit'
+
+  Then restart your PostgreSQL server
+
+=== Installing the PostgreSQL function and triggers for your project
+
+  $ rake pg_audit_log:install
+
+== Using on your project
+
+The PgAuditLog::Entry ActiveRecord model represents a single entry in the audit log table. Each entry represents a single change to a single field of a record in a table. So if you change 3 columns of a record, that will generate 3 corresponding PgAuditLog::Entry records.
+
+=== Migrations
+
+TODO
+
+=== schema.rb and development_structure.sql
+
+Since schema.rb cannot represent TRIGGERs or FUNCTIONs you will need to set your environment to generate SQL instead of ruby for your database schema and structure. In your application environment put the following:
+
+  config.active_record.schema_format = :sql
+
+And you can generate this sql using:
+
+  $ rake db:structure:dump
+
+=== Uninstalling
+
+  $ rake pg_audit_log:uninstall
+
+== REQUIREMENTS
+
+* ActiveRecord
+
+== LICENSE
+
+MIT

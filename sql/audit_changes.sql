@@ -1,5 +1,5 @@
 CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
-CREATE FUNCTION audit_changes() RETURNS trigger
+CREATE OR REPLACE FUNCTION audit_changes() RETURNS trigger
     LANGUAGE plpgsql
     AS $_$
             DECLARE

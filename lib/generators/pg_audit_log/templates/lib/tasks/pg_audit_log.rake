@@ -1,4 +1,4 @@
-namespace :audit_log do
+namespace :pg_audit_log do
   IGNORED_TABLES = ["audit_log", "plugin_schema_migrations", "sessions", "schema_migrations"]
 
   desc "Install audit_log triggers on all tables"
