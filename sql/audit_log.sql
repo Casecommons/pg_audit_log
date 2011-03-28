@@ -11,7 +11,7 @@ CREATE TABLE audit_log (
     field_name character varying(255),
     field_value_new text,
     field_value_old text,
-    "when" timestamp without time zone,
+    occurred_at timestamp without time zone,
     primary_key character varying(255)
 );
 

@@ -40,7 +40,7 @@ describe PgAuditLog do
         subject { PgAuditLog::Entry.last(:conditions => { :field_name => "str" }) }
 
         it { should be }
-        its(:when) { should be }
+        its(:occurred_at) { should be }
         its(:table_name) { should == AuditedModel.table_name }
         its(:field_name) { should == "str" }
         its(:primary_key) { should == AuditedModel.last.id.to_s }

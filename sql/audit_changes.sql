@@ -53,7 +53,7 @@ CREATE OR REPLACE FUNCTION audit_changes() RETURNS trigger
                                           "field_value_new",
                                           "user_id",
                                           "user_unique_name",
-                                          "when"
+                                          "occurred_at"
                                          )
                     VALUES(TG_OP,
                           TG_RELNAME,
