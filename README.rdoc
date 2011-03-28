@@ -25,6 +25,10 @@ All SQL INSERTs, UPDATEs, and DELETEs will be captured. Record columns that do n
 
   Then restart your PostgreSQL server
 
+=== Rails 3
+
+  $ rails generate pg_audit_log:install
+
 === Installing the PostgreSQL function and triggers for your project
 
   $ rake pg_audit_log:install
