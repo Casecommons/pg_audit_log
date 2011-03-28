@@ -5,7 +5,6 @@ module PgAuditLog
 
       def install
         directory "lib/tasks"
-        copy_file "lib/tasks/pg_audit_log.rake", "lib/tasks/pg_audit_log.rake"
       end
     end
   end

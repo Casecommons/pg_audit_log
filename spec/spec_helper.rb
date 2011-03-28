@@ -20,9 +20,11 @@ end
 
 connection.execute("DROP TABLE IF EXISTS audit_log")
 
-["audit_changes.sql", "audit_log.sql"].each do |sql_file|
+sql_path = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "generators", "pg_audit_log", "templates", "lib", "tasks", "pg_audit_log"))
+
+["create_audit_changes.sql", "create_audit_log_table.sql"].each do |sql_file|
   begin
-    connection.execute File.read(File.join(File.dirname(__FILE__), "..", "sql", sql_file))
+    connection.execute File.read(File.join(sql_path, sql_file))
   rescue => e
     puts "-" * 80
     puts "Unable to install #{sql_file}"
