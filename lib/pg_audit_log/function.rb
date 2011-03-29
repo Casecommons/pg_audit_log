@@ -43,7 +43,9 @@ module PgAuditLog
                 END IF;
                 IF TG_OP = 'DELETE' OR TG_OP = 'UPDATE' THEN
                   EXECUTE 'SELECT CAST($1 . '|| column_name ||' AS TEXT)' INTO old_value USING OLD;
-                  EXECUTE 'SELECT CAST($1 . '|| primary_key_column ||' AS VARCHAR)' INTO primary_key_value USING OLD;
+                  IF primary_key_column IS NOT NULL THEN
+                    EXECUTE 'SELECT CAST($1 . '|| primary_key_column ||' AS VARCHAR)' INTO primary_key_value USING OLD;
+                  END IF;
                 END IF;
 
                 IF TG_RELNAME = 'users' AND column_name = 'last_accessed_at' THEN

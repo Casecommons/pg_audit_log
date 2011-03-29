@@ -4,7 +4,7 @@ module PgAuditLog
   module Generators
     class InstallGenerator < Rails::Generators::Base
       include Rails::Generators::Migration
-      extend ActiveRecord::Generators::Migration
+      extend ::ActiveRecord::Generators::Migration
 
       source_root File.expand_path('../templates', __FILE__)
 
