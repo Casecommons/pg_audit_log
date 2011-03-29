@@ -5,7 +5,6 @@ module PgAuditLog
 
       def install
         directory "spec/models"
-        copy_file "spec/models/pg_audit_log_spec.rb", "spec/models/pg_audit_log_spec.rb"
       end
     end
   end

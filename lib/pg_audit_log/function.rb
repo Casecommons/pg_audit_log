@@ -1,7 +1,12 @@
-CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION audit_changes() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $_$
+module PgAuditLog
+  class Function < ActiveRecord
+    class << self
+      def install
+        execute <<-SQL
+        CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
+        CREATE OR REPLACE FUNCTION audit_changes() RETURNS trigger
+        LANGUAGE plpgsql
+        AS $_$
             DECLARE
               col information_schema.columns %ROWTYPE;
               new_value text;
@@ -70,3 +75,12 @@ CREATE OR REPLACE FUNCTION audit_changes() RETURNS trigger
               RETURN NULL;
             END
             $_$;
+        SQL
+      end
+
+      def uninstall
+        execute "DROP FUNCTION audit_changes()"
+      end
+    end
+  end
+end
