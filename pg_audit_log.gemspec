@@ -17,8 +17,8 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency("rails", ">=2.3")
+  s.add_dependency("rails", ">= 3.0.0")
   s.add_dependency("pg", ">= 0.9.0")
   s.add_development_dependency('rspec-rails')
-  s.add_development_dependency('with_model')
+  s.add_development_dependency('with_model', '>= 0.1.3')
 end

@@ -13,30 +13,37 @@ describe PgAuditLog do
       end
     end
 
+    with_model :audited_model_without_primary_key do
+      table :id => false do |t|
+        t.string :str
+        t.text :txt
+        t.integer :int
+        t.date :date
+        t.datetime :dt
+        t.boolean :bool
+      end
+    end
+
     before do
-      AuditedModel.connection.execute(<<-SQL)
-            CREATE TRIGGER audit_audited_models
-            AFTER INSERT OR UPDATE OR DELETE
-            ON #{AuditedModel.quoted_table_name}
-            FOR EACH ROW
-              EXECUTE PROCEDURE audit_changes()
-          SQL
+      PgAuditLog::Triggers.create_for_table(AuditedModel.table_name)
+      PgAuditLog::Triggers.create_for_table(AuditedModelWithoutPrimaryKey.table_name)
     end
 
     after do
-      AuditedModel.connection.execute("DROP TRIGGER audit_audited_models ON #{AuditedModel.quoted_table_name};")
+      PgAuditLog::Triggers.drop_for_table(AuditedModel.table_name)
+      PgAuditLog::Triggers.drop_for_table(AuditedModelWithoutPrimaryKey.table_name)
       PgAuditLog::Entry.connection.execute("TRUNCATE #{PgAuditLog::Entry.quoted_table_name}")
     end
 
     let(:attributes) { { :str => "foo", :txt => "bar", :int => 5, :date => Date.today, :dt => Time.now.midnight } }
 
     context "on create" do
+      describe "the audit log record with a primary key" do
 
-      before do
-        AuditedModel.create!(attributes)
-      end
+        before do
+          AuditedModel.create!(attributes)
+        end
 
-      describe "the audit log record" do
         subject { PgAuditLog::Entry.last(:conditions => { :field_name => "str" }) }
 
         it { should be }
@@ -73,6 +80,19 @@ describe PgAuditLog do
             PgAuditLog::Entry.last(:conditions => { :field_name => field_name }).field_value_old.should be_nil
           end
         end
+
+      end
+
+      describe "the audit log record without a primary key" do
+        before do
+          AuditedModelWithoutPrimaryKey.create!(attributes)
+        end
+
+        subject { PgAuditLog::Entry.last(:conditions => { :field_name => "str" }) }
+
+        it { should be }
+        its(:field_name) { should == "str" }
+        its(:primary_key) { should be_nil }
 
       end
     end
