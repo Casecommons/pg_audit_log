@@ -40,11 +40,11 @@ module PgAuditLog
 
       def create_for_table(table_name)
         execute <<-SQL
-        CREATE TRIGGER audit_#{table_name}
+        CREATE TRIGGER #{trigger_name_for_table(table_name)}
         AFTER INSERT OR UPDATE OR DELETE
         ON #{table_name}
         FOR EACH ROW
-        EXECUTE PROCEDURE audit_changes()
+        EXECUTE PROCEDURE #{PgAuditLog::Function.name}()
         SQL
       end
 

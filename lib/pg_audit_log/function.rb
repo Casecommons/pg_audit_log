@@ -1,10 +1,34 @@
 module PgAuditLog
   class Function < PgAuditLog::ActiveRecord
     class << self
+      def name
+        "audit_changes"
+      end
+
+      def custom_variable
+        "audit"
+      end
+
+      def users_table_name
+        "users"
+      end
+
+      def user_id_field
+        "user_id"
+      end
+
+      def user_name_field
+        "user_unique_name"
+      end
+
+      def users_access_column
+        "last_accessed_at"
+      end
+
       def install
         execute <<-SQL
         CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
-        CREATE OR REPLACE FUNCTION audit_changes() RETURNS trigger
+        CREATE OR REPLACE FUNCTION #{name}() RETURNS trigger
         LANGUAGE plpgsql
         AS $_$
             DECLARE
@@ -22,8 +46,8 @@ module PgAuditLog
                 old_value := NULL;
                 primary_key_column := NULL;
                 primary_key_value := NULL;
-                user_identifier := current_setting('audit.user_id');
-                unique_name := current_setting('audit.user_unique_name');
+                user_identifier := current_setting('#{custom_variable}.#{user_id_field}');
+                unique_name := current_setting('#{custom_variable}.#{user_name_field}');
                 column_name := col.column_name;
 
                 EXECUTE 'SELECT pg_attribute.attname
@@ -48,7 +72,7 @@ module PgAuditLog
                   END IF;
                 END IF;
 
-                IF TG_RELNAME = 'users' AND column_name = 'last_accessed_at' THEN
+                IF TG_RELNAME = '#{users_table_name}' AND column_name = '#{users_access_column}' THEN
                   NULL;
                 ELSE
                   IF TG_OP != 'UPDATE' OR new_value != old_value OR (TG_OP = 'UPDATE' AND ( (new_value IS NULL AND old_value IS NOT NULL) OR (new_value IS NOT NULL AND old_value IS NULL))) THEN
@@ -81,7 +105,7 @@ module PgAuditLog
       end
 
       def uninstall
-        execute "DROP FUNCTION audit_changes()"
+        execute "DROP FUNCTION #{name}()"
       end
     end
   end
