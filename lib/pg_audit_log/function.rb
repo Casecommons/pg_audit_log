@@ -1,5 +1,5 @@
 module PgAuditLog
-  class Function < ActiveRecord
+  class Function < PgAuditLog::ActiveRecord
     class << self
       def install
         execute <<-SQL
