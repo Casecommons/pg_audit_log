@@ -31,18 +31,32 @@ describe PgAuditLog::Triggers do
     end
 
     describe ".enable" do
-      it "should work" do
+      it "should not blow up" do
         ->{
           PgAuditLog::Triggers.enable
         }.should_not raise_error
       end
+
+      it "should fire the audit" do
+        PgAuditLog::Triggers.enable
+        expect {
+          TableWithTriggers.create!
+        }.to change(PgAuditLog::Entry, :count)
+      end
     end
 
     describe ".disable" do
-      it "should work" do
+      it "should not blow up" do
         ->{
           PgAuditLog::Triggers.disable
         }.should_not raise_error
+      end
+
+      it "should not fire the audit" do
+        PgAuditLog::Triggers.disable
+        expect {
+          TableWithTriggers.create!
+        }.to_not change(PgAuditLog::Entry, :count)
       end
     end
 

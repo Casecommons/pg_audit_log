@@ -53,11 +53,11 @@ module PgAuditLog
       end
 
       def enable_for_table(table_name)
-        execute "ALTER TABLE #{table_name} DISABLE TRIGGER #{trigger_name_for_table(table_name)}"
+        execute "ALTER TABLE #{table_name} ENABLE TRIGGER #{trigger_name_for_table(table_name)}"
       end
 
       def disable_for_table(table_name)
-        execute "ALTER TABLE #{table_name} ENABLE TRIGGER #{trigger_name_for_table(table_name)}"
+        execute "ALTER TABLE #{table_name} DISABLE TRIGGER #{trigger_name_for_table(table_name)}"
       end
 
       def trigger_name_for_table(table_name)
