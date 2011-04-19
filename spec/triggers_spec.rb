@@ -9,6 +9,22 @@ describe PgAuditLog::Triggers do
     table {}
   end
 
+  with_model :table_without_triggers do
+    table {}
+  end
+
+  describe ".tables_without_triggers" do
+    before do
+      PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
+    end
+
+    it "should return an array of all tables that do not have an audit trigger installed" do
+      PgAuditLog::Triggers.tables_without_triggers.should_not include(TableWithTriggers.table_name)
+      PgAuditLog::Triggers.tables_without_triggers.should include(TableWithoutTriggers.table_name)
+    end
+
+  end
+
   describe ".install" do
     it "should work" do
       ->{

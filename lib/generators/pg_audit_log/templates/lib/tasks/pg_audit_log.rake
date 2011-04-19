@@ -26,6 +26,12 @@ namespace :pg_audit_log do
     export_development_structure
   end
 
+  desc "Check all tables that are missing triggers (fails if any are)"
+  task :check => :environment do
+    tables = PgAuditLog::Triggers.tables_without_triggers
+    raise(PgAuditLog::Triggers::MissingTriggers, tables) if tables.any?
+  end
+
   private
 
   def export_development_structure
