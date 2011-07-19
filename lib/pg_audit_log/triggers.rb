@@ -14,14 +14,17 @@ module PgAuditLog
         connection.tables - (PgAuditLog::IGNORED_TABLES + [PgAuditLog::Entry.table_name])
       end
 
-      def tables_without_triggers
-        tables_with_triggers = connection.select_values <<-SQL
+      def tables_with_triggers
+        connection.select_values <<-SQL
           SELECT tables.relname as table_name
           FROM pg_trigger triggers, pg_class tables
           WHERE triggers.tgrelid = tables.oid
           AND tables.relname !~ '^pg_'
           AND triggers.tgname LIKE '#{trigger_prefix}%'
         SQL
+      end
+
+      def tables_without_triggers
         tables - tables_with_triggers
       end
 
@@ -32,19 +35,19 @@ module PgAuditLog
       end
 
       def uninstall
-        tables.each do |table|
+        tables_with_triggers.each do |table|
           drop_for_table(table)
         end
       end
 
       def enable
-        tables.each do |table|
+        tables_with_triggers.each do |table|
           enable_for_table(table)
         end
       end
 
       def disable
-        tables.each do |table|
+        tables_with_triggers.each do |table|
           disable_for_table(table)
         end
       end

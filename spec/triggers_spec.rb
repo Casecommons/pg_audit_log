@@ -13,6 +13,17 @@ describe PgAuditLog::Triggers do
     table {}
   end
 
+  describe ".tables_with_triggers" do
+    before do
+      PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
+    end
+
+    it "should return an array of all tables that do have an audit trigger installed" do
+      PgAuditLog::Triggers.tables_with_triggers.should include(TableWithTriggers.table_name)
+      PgAuditLog::Triggers.tables_with_triggers.should_not include(TableWithoutTriggers.table_name)
+    end
+  end
+
   describe ".tables_without_triggers" do
     before do
       PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
@@ -22,7 +33,6 @@ describe PgAuditLog::Triggers do
       PgAuditLog::Triggers.tables_without_triggers.should_not include(TableWithTriggers.table_name)
       PgAuditLog::Triggers.tables_without_triggers.should include(TableWithoutTriggers.table_name)
     end
-
   end
 
   describe ".install" do
@@ -35,7 +45,7 @@ describe PgAuditLog::Triggers do
 
   context "when triggers are installed" do
     before do
-      PgAuditLog::Triggers.install
+      PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
     end
 
     describe ".uninstall" do
