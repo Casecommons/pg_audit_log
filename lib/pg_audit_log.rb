@@ -4,7 +4,17 @@ end
 
 require "active_record"
 require "pg_audit_log/version"
-require "pg_audit_log/extensions/postgresql_adapter.rb"
+
+case ::ActiveRecord::VERSION::MAJOR
+when 3
+  if ::ActiveRecord::VERSION::MINOR == 0
+    require "pg_audit_log/extensions/3.0/postgresql_adapter.rb"
+  else
+    require "pg_audit_log/extensions/3.1/postgresql_adapter.rb"
+  end
+else
+  raise "ActiveRecord #{::ActiveRecord::VERSION::MAJOR}.x unsupported!"
+end
 require "pg_audit_log/active_record"
 require "pg_audit_log/entry"
 require "pg_audit_log/function"
