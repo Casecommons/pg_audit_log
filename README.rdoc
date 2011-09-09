@@ -9,6 +9,8 @@ Comes with specs for your project and a rake task to generate the reverse SQL to
 
 All SQL INSERTs, UPDATEs, and DELETEs will be captured. Record columns that do not change do not generate an audit log entry.
 
+Compatible with Rails 3.0.x and 3.1.x
+
 == INSTALL
 
 === Enable custom variables in your postgresql instance
