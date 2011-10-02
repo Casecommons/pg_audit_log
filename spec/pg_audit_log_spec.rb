@@ -280,4 +280,18 @@ describe PgAuditLog do
     end
   end
 
+  describe "when the function does not yet exist" do
+    before do
+      PgAuditLog::Function.uninstall
+    end
+
+    context "when creating a table" do
+      it "should install the function then enable the trigger on the table" do
+        connection.create_table("some_more_new_table")
+        PgAuditLog::Triggers.tables_with_triggers.should include("some_more_new_table")
+        connection.drop_table("some_more_new_table")
+      end
+    end
+  end
+
 end

@@ -23,7 +23,7 @@ RSpec.configure do |config|
   config.mock_with :rspec
   config.extend WithModel
 
-  config.before(:all) do
+  config.before(:each) do
     connection.tables.each do |table|
       connection.drop_table_without_auditing(table)
     end

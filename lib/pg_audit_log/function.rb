@@ -107,6 +107,14 @@ module PgAuditLog
       def uninstall
         execute "DROP FUNCTION #{name}()"
       end
+
+      def installed?
+        connection.select_values(<<-SQL).first.to_i == 1
+          SELECT COUNT(pg_proc.proname)
+          FROM pg_proc
+          WHERE pg_proc.proname = '#{name}'
+        SQL
+      end
     end
   end
 end
