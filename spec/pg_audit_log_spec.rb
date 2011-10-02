@@ -309,4 +309,15 @@ describe PgAuditLog do
     end
   end
 
+  describe "ignored tables" do
+    context "when creating one of those tables" do
+      it "should not automatically create a trigger for it" do
+        PgAuditLog::IGNORED_TABLES << "ignored_table"
+        connection.create_table("ignored_table")
+        PgAuditLog::Triggers.tables_with_triggers.should_not include("ignored_table")
+        connection.drop_table("ignored_table")
+      end
+    end
+  end
+
 end

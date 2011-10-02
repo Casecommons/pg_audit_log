@@ -69,7 +69,9 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
 
   def create_table_with_auditing(table_name, options = {}, &block)
     create_table_without_auditing(table_name, options, &block)
-    unless options[:temporary] || PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
+    unless options[:temporary] ||
+      PgAuditLog::IGNORED_TABLES.include?(table_name) ||
+      PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
       PgAuditLog::Triggers.create_for_table(table_name)
     end
   end
@@ -80,7 +82,8 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     if PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
       PgAuditLog::Triggers.drop_for_table(table_name)
     end
-    unless PgAuditLog::Triggers.tables_with_triggers.include?(new_name)
+    unless PgAuditLog::IGNORED_TABLES.include?(table_name) ||
+      PgAuditLog::Triggers.tables_with_triggers.include?(new_name)
       PgAuditLog::Triggers.create_for_table(new_name)
     end
   end
