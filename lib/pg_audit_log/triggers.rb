@@ -75,6 +75,7 @@ module PgAuditLog
       end
 
       def drop_for_table(table_name)
+        return unless tables_with_triggers.include?(table_name)
         execute "DROP TRIGGER #{trigger_name_for_table(table_name)} ON #{table_name}"
       end
 

@@ -111,6 +111,17 @@ describe PgAuditLog::Triggers do
       end
     end
 
+    describe ".drop_for_table" do
+      context "for a table that has no trigger" do
+        it "should not blow up" do
+          PgAuditLog::Triggers.drop_for_table(TableWithTriggers.table_name)
+          ->{
+            PgAuditLog::Triggers.drop_for_table(TableWithTriggers.table_name)
+          }.should_not raise_error
+        end
+      end
+    end
+
   end
 end
 
