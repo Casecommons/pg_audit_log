@@ -294,4 +294,19 @@ describe PgAuditLog do
     end
   end
 
+  describe "when the entry table does not yet exist" do
+    before do
+      PgAuditLog::Entry.uninstall
+    end
+
+    context "when creating a table" do
+      it "should install the entry table then enable the trigger on the table" do
+        PgAuditLog::Entry.installed?.should be_false
+        connection.create_table("another_table")
+        PgAuditLog::Entry.installed?.should be_true
+        connection.drop_table("another_table")
+      end
+    end
+  end
+
 end
