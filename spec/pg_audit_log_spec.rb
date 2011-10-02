@@ -1,6 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe PgAuditLog do
+  let(:connection) { ActiveRecord::Base.connection }
+
   describe "a model that is audited" do
     with_model :audited_model do
       table do |t|
@@ -223,7 +225,6 @@ describe PgAuditLog do
   end
 
   describe "during migrations" do
-    let(:connection) { ActiveRecord::Base.connection }
 
     before do
       connection.drop_table("test_table") rescue nil
@@ -258,6 +259,23 @@ describe PgAuditLog do
         PgAuditLog::Triggers.tables_with_triggers.should_not include("test_table")
         PgAuditLog::Triggers.tables_with_triggers.should include(new_table_name)
         connection.drop_table(new_table_name) rescue nil
+      end
+    end
+  end
+
+  describe "temporary tables" do
+    context "when creating them" do
+      it "should be ignored" do
+        connection.create_table("some_temp_table", :temporary => true)
+        PgAuditLog::Triggers.tables_with_triggers.should_not include("some_temp_table")
+        connection.drop_table("some_temp_table")
+      end
+    end
+    context "when dropping them" do
+      it "should be ignored" do
+        connection.create_table("some_temp_table", :temporary => true)
+        connection.drop_table("some_temp_table")
+        PgAuditLog::Triggers.tables_with_triggers.should_not include("some_temp_table")
       end
     end
   end
