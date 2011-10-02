@@ -13,11 +13,11 @@ describe PgAuditLog::Triggers do
     table {}
   end
 
-  describe ".tables_with_triggers" do
-    before do
-      PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
-    end
+  before do
+    PgAuditLog::Triggers.drop_for_table(TableWithoutTriggers.table_name) rescue nil
+  end
 
+  describe ".tables_with_triggers" do
     it "should return an array of all tables that do have an audit trigger installed" do
       PgAuditLog::Triggers.tables_with_triggers.should include(TableWithTriggers.table_name)
       PgAuditLog::Triggers.tables_with_triggers.should_not include(TableWithoutTriggers.table_name)
@@ -25,29 +25,43 @@ describe PgAuditLog::Triggers do
   end
 
   describe ".tables_without_triggers" do
-    before do
-      PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
-    end
-
     it "should return an array of all tables that do not have an audit trigger installed" do
       PgAuditLog::Triggers.tables_without_triggers.should_not include(TableWithTriggers.table_name)
       PgAuditLog::Triggers.tables_without_triggers.should include(TableWithoutTriggers.table_name)
     end
   end
 
-  describe ".install" do
-    it "should work" do
-      ->{
-        PgAuditLog::Triggers.install
-      }.should_not raise_error
+  context "when no triggers are installed" do
+    before do
+      PgAuditLog::Triggers.uninstall
     end
+
+    describe ".install" do
+      it "should work" do
+        ->{
+          PgAuditLog::Triggers.install
+        }.should_not raise_error
+      end
+    end
+
+    describe ".uninstall" do
+      it "should work" do
+        ->{
+          PgAuditLog::Triggers.uninstall
+        }.should_not raise_error
+      end
+    end
+
   end
 
   context "when triggers are installed" do
-    before do
-      PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
+    describe ".install" do
+      it "should work" do
+        ->{
+          PgAuditLog::Triggers.install
+        }.should_not raise_error
+      end
     end
-
     describe ".uninstall" do
       it "should work" do
         ->{
@@ -87,7 +101,5 @@ describe PgAuditLog::Triggers do
     end
 
   end
-
-
 end
 

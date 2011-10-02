@@ -18,13 +18,20 @@ rescue PGError => e
   raise e
 end
 
-PgAuditLog::Entry.uninstall
-PgAuditLog::Entry.install
-PgAuditLog::Function.install
 
 RSpec.configure do |config|
   config.mock_with :rspec
   config.extend WithModel
+
+  config.before(:all) do
+    connection.tables.each do |table|
+      connection.drop_table_without_auditing(table)
+    end
+    PgAuditLog::Triggers.uninstall rescue nil
+    PgAuditLog::Entry.uninstall
+    PgAuditLog::Entry.install
+    PgAuditLog::Function.install
+  end
 
   config.after(:each) do
     ActiveRecord::Base.connection.reconnect!

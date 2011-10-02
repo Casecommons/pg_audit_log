@@ -50,5 +50,32 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     execute_without_auditing("RELEASE SAVEPOINT #{current_savepoint_name}")
   end
 
+  def drop_table_with_auditing(table_name, options = {})
+    if PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
+      PgAuditLog::Triggers.drop_for_table(table_name)
+    end
+    drop_table_without_auditing(table_name, options)
+  end
+  alias_method_chain :drop_table, :auditing
+
+  def create_table_with_auditing(table_name, options = {}, &block)
+    create_table_without_auditing(table_name, options, &block)
+    unless PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
+      PgAuditLog::Triggers.create_for_table(table_name)
+    end
+  end
+  alias_method_chain :create_table, :auditing
+
+  def rename_table_with_auditing(table_name, new_name)
+    rename_table_without_auditing(table_name, new_name)
+    if PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
+      PgAuditLog::Triggers.drop_for_table(table_name)
+    end
+    unless PgAuditLog::Triggers.tables_with_triggers.include?(new_name)
+      PgAuditLog::Triggers.create_for_table(new_name)
+    end
+  end
+  alias_method_chain :rename_table, :auditing
+
 end
 

@@ -24,14 +24,7 @@ describe PgAuditLog do
       end
     end
 
-    before do
-      PgAuditLog::Triggers.create_for_table(AuditedModel.table_name)
-      PgAuditLog::Triggers.create_for_table(AuditedModelWithoutPrimaryKey.table_name)
-    end
-
     after do
-      PgAuditLog::Triggers.drop_for_table(AuditedModel.table_name)
-      PgAuditLog::Triggers.drop_for_table(AuditedModelWithoutPrimaryKey.table_name)
       PgAuditLog::Entry.connection.execute("TRUNCATE #{PgAuditLog::Entry.quoted_table_name}")
     end
 
@@ -225,6 +218,46 @@ describe PgAuditLog do
         subject { PgAuditLog::Entry.last(:conditions => { :field_name => "str" }) }
 
         its(:primary_key) { should be_nil }
+      end
+    end
+  end
+
+  describe "during migrations" do
+    let(:connection) { ActiveRecord::Base.connection }
+
+    before do
+      connection.drop_table("test_table") rescue nil
+      connection.drop_table("new_table") rescue nil
+    end
+
+    after do
+      connection.drop_table("test_table") rescue nil
+    end
+
+    describe "when creating the table" do
+      it "should automatically create the trigger" do
+        PgAuditLog::Triggers.tables_with_triggers.should_not include("test_table")
+        connection.create_table("test_table")
+        PgAuditLog::Triggers.tables_with_triggers.should include("test_table")
+      end
+    end
+
+    describe "when dropping the table" do
+      it "should automatically drop the trigger" do
+        connection.create_table("test_table")
+        connection.drop_table("test_table")
+        PgAuditLog::Triggers.tables_with_triggers.should_not include("test_table")
+      end
+    end
+
+    describe "when renaming the table" do
+      it "should automatically drop and create the trigger" do
+        new_table_name = "new_table_#{Time.now.to_i}"
+        connection.create_table("test_table")
+        connection.rename_table("test_table", new_table_name)
+        PgAuditLog::Triggers.tables_with_triggers.should_not include("test_table")
+        PgAuditLog::Triggers.tables_with_triggers.should include(new_table_name)
+        connection.drop_table(new_table_name) rescue nil
       end
     end
   end

@@ -30,13 +30,13 @@ module PgAuditLog
 
       def install
         tables.each do |table|
-          create_for_table(table)
+          create_for_table(table) unless tables_with_triggers.include?(table)
         end
       end
 
       def uninstall
         tables_with_triggers.each do |table|
-          drop_for_table(table)
+          drop_for_table(table) if tables_with_triggers.include?(table)
         end
       end
 
