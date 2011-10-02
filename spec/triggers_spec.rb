@@ -100,6 +100,17 @@ describe PgAuditLog::Triggers do
       end
     end
 
+    describe ".create_for_table" do
+      context "for a table that already has a trigger" do
+        it "should not blow up" do
+          PgAuditLog::Triggers.tables_with_triggers.should include(TableWithTriggers.table_name)
+          ->{
+            PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
+          }.should_not raise_error
+        end
+      end
+    end
+
   end
 end
 

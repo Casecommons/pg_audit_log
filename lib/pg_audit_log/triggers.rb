@@ -64,6 +64,7 @@ module PgAuditLog
       def create_for_table(table_name)
         PgAuditLog::Entry.install unless PgAuditLog::Entry.installed?
         PgAuditLog::Function.install unless PgAuditLog::Function.installed?
+        return if tables_with_triggers.include?(table_name)
         execute <<-SQL
         CREATE TRIGGER #{trigger_name_for_table(table_name)}
         AFTER INSERT OR UPDATE OR DELETE
