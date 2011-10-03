@@ -7,6 +7,7 @@ require "pg_audit_log/version"
 
 case ::ActiveRecord::VERSION::MAJOR
 when 3
+  require "pg_audit_log/extensions/shared/postgresql_adapter.rb"
   if ::ActiveRecord::VERSION::MINOR == 0
     require "pg_audit_log/extensions/3.0/postgresql_adapter.rb"
   else
