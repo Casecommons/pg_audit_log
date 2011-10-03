@@ -56,4 +56,13 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   end
   alias_method_chain :rename_table, :auditing
 
+  private
+
+  def user_id_and_name
+    current_user = Thread.current[:current_user]
+    user_id = current_user.try(:id) || "-1"
+    user_unique_name = current_user.try(:unique_name) || "UNKNOWN"
+    return [user_id, user_unique_name]
+  end
+
 end

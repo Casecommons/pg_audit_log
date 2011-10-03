@@ -13,19 +13,11 @@ Compatible with Rails 3.0.x and 3.1.x
 
 == INSTALL
 
-=== Enable custom variables in your postgresql instance
+=== Enable plpgsql langauges in your postgresql instance
 
-  To enable auditing you need to set a variable in your postgresql.conf file:
+  As a superuser in postgres make sure your database has plpgsql enabled:
 
-  For macports: /opt/local/var/db/postgresql84/defaultdb/postgresql.conf
-  For homebrew: /usr/local/var/postgres/postgresql.conf
-  For linux: it varies from distro to distro.
-
-  At the bottom of the file add the following:
-
-    custom_variable_classes = 'audit'
-
-  Then restart your PostgreSQL server
+  CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
 
 === Rails 3
 

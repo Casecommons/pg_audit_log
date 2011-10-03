@@ -5,10 +5,6 @@ module PgAuditLog
         "audit_changes"
       end
 
-      def custom_variable
-        "audit"
-      end
-
       def users_table_name
         "users"
       end
@@ -23,6 +19,30 @@ module PgAuditLog
 
       def users_access_column
         "last_accessed_at"
+      end
+
+      def user_identifier_temporary_function(user_id)
+        sql = <<-SQL
+          CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_identifier() RETURNS integer
+          LANGUAGE plpgsql
+          AS $_$
+            BEGIN
+              RETURN #{user_id};
+            END
+            $_$;
+        SQL
+      end
+
+      def user_unique_name_temporary_function(username)
+        sql = <<-SQL
+          CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar
+          LANGUAGE plpgsql
+          AS $_$
+            BEGIN
+              RETURN '#{username}';
+            END
+            $_$;
+        SQL
       end
 
       def install
@@ -46,8 +66,8 @@ module PgAuditLog
                 old_value := NULL;
                 primary_key_column := NULL;
                 primary_key_value := NULL;
-                user_identifier := current_setting('#{custom_variable}.#{user_id_field}');
-                unique_name := current_setting('#{custom_variable}.#{user_name_field}');
+                user_identifier := pg_temp.pg_audit_log_user_identifier();
+                unique_name := pg_temp.pg_audit_log_user_unique_name();
                 column_name := col.column_name;
 
                 EXECUTE 'SELECT pg_attribute.attname
