@@ -1,6 +1,10 @@
 class PgAuditLog::Entry < ActiveRecord::Base
   TABLE_NAME = "audit_log"
-  set_table_name TABLE_NAME
+  if ::ActiveRecord::VERSION::MAJOR == 3 && ::ActiveRecord::VERSION::MINOR >= 2
+    self.table_name = TABLE_NAME
+  else
+    set_table_name TABLE_NAME
+  end
 
   class CannotDeleteError < StandardError
     def message

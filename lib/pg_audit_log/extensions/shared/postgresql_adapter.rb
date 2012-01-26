@@ -30,7 +30,11 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     if PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
       PgAuditLog::Triggers.drop_for_table(table_name)
     end
-    drop_table_without_auditing(table_name, options)
+    if ::ActiveRecord::VERSION::MAJOR == 3 && ::ActiveRecord::VERSION::MINOR >= 2
+      drop_table_without_auditing(table_name)
+    else
+      drop_table_without_auditing(table_name, options)
+    end
   end
   alias_method_chain :drop_table, :auditing
 
