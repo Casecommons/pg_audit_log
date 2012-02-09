@@ -61,23 +61,23 @@ module PgAuditLog
               unique_name varchar;
               column_name varchar;
             BEGIN
+              primary_key_column := NULL;
+              EXECUTE 'SELECT pg_attribute.attname
+                       FROM pg_index, pg_class, pg_attribute
+                       WHERE pg_class.oid = $1::regclass
+                       AND indrelid = pg_class.oid
+                       AND pg_attribute.attrelid = pg_class.oid
+                       AND pg_attribute.attnum = any(pg_index.indkey)
+                       AND indisprimary'
+              INTO primary_key_column USING TG_RELNAME;
+
               FOR col IN SELECT * FROM information_schema.columns WHERE table_name = TG_RELNAME LOOP
                 new_value := NULL;
                 old_value := NULL;
-                primary_key_column := NULL;
                 primary_key_value := NULL;
                 user_identifier := pg_temp.pg_audit_log_user_identifier();
                 unique_name := pg_temp.pg_audit_log_user_unique_name();
                 column_name := col.column_name;
-
-                EXECUTE 'SELECT pg_attribute.attname
-                         FROM pg_index, pg_class, pg_attribute
-                         WHERE pg_class.oid = $1::regclass
-                         AND indrelid = pg_class.oid
-                         AND pg_attribute.attrelid = pg_class.oid
-                         AND pg_attribute.attnum = any(pg_index.indkey)
-                         AND indisprimary'
-                INTO primary_key_column USING TG_RELNAME;
 
                 IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
                   EXECUTE 'SELECT CAST($1 . '|| column_name ||' AS TEXT)' INTO new_value USING NEW;

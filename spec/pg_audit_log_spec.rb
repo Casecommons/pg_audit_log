@@ -222,6 +222,19 @@ describe PgAuditLog do
         its(:primary_key) { should be_nil }
       end
     end
+
+    describe "performance" do
+      xit "should perform well" do
+        require "benchmark"
+        results = Benchmark.measure do
+          1000.times do
+            AuditedModel.create!(attributes)
+          end
+        end
+        puts results.real
+        puts results.real / 1000.0
+      end
+    end
   end
 
   describe "during migrations" do
