@@ -28,7 +28,7 @@ class PgAuditLog::Entry < ActiveRecord::Base
             INCREMENT BY 1;
 
         CREATE TABLE #{self.table_name} (
-            id integer PRIMARY KEY DEFAULT nextval('#{self.table_name}_id_seq'),
+            id bigint PRIMARY KEY DEFAULT nextval('#{self.table_name}_id_seq'),
             user_id integer,
             user_unique_name character varying(255),
             operation character varying(255),
