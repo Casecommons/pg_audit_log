@@ -31,6 +31,7 @@ module PgAuditLog
             END
             $_$;
         SQL
+        sql.split("\n").join(" ")
       end
 
       def user_unique_name_temporary_function(username)
@@ -43,6 +44,7 @@ module PgAuditLog
             END
             $_$;
         SQL
+        sql.split("\n").join(" ")
       end
 
       def install

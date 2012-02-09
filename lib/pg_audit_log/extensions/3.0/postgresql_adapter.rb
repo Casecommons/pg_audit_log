@@ -7,7 +7,8 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     log_user_id = PgAuditLog::Function.user_identifier_temporary_function(user_id)
     log_user_unique_name = PgAuditLog::Function.user_unique_name_temporary_function(unique_name)
 
-    log([log_user_id, log_user_unique_name, sql].join("; "), name) do
+    logged_sql = ENV["LOG_AUDIT_SQL"] ? [log_user_id, log_user_unique_name, sql].values.join('; ') : sql
+    log(logged_sql, name) do
       if @async
         @connection.async_exec(log_user_id)
         @connection.async_exec(log_user_unique_name)

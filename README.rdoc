@@ -33,6 +33,8 @@ On a 2.93GHz i7 with postgresql 9.1 the audit log has an overhead of about 0.003
 
 The PgAuditLog::Entry ActiveRecord model represents a single entry in the audit log table. Each entry represents a single change to a single field of a record in a table. So if you change 3 columns of a record, that will generate 3 corresponding PgAuditLog::Entry records.
 
+You can see the SQL it injects on every query by running with LOG_AUDIT_SQL
+
 === Migrations
 
 TODO

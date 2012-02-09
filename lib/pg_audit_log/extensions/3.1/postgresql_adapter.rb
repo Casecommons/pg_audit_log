@@ -11,7 +11,8 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
 
   def exec_query_with_auditing(sql, name = 'SQL', binds = [])
     audited_sql = generate_auditing_sql(sql)
-    log(audited_sql.values.join("; "), name, binds) do
+    logged_sql = ENV["LOG_AUDIT_SQL"] ? audited_sql.values.join('; ') : sql
+    log(logged_sql, name, binds) do
       exec_no_cache(audited_sql[:user_id], binds)
       exec_no_cache(audited_sql[:unique_name], binds)
       result = binds.empty? ? exec_no_cache(sql, binds) :
