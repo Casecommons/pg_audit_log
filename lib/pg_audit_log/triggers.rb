@@ -11,7 +11,11 @@ module PgAuditLog
 
     class << self
       def tables
-        connection.tables - (PgAuditLog::IGNORED_TABLES + [PgAuditLog::Entry.table_name])
+        skip_tables = (PgAuditLog::IGNORED_TABLES + [PgAuditLog::Entry.table_name])
+        connection.tables.reject do |table|
+          skip_tables.include?(table) ||
+            skip_tables.any? { |skip_table| skip_table =~ table if skip_table.is_a? Regexp }
+        end
       end
 
       def tables_with_triggers
@@ -26,6 +30,10 @@ module PgAuditLog
 
       def tables_without_triggers
         tables - tables_with_triggers
+      end
+
+      def all_tables_without_triggers
+        connection.tables - tables_with_triggers
       end
 
       def install

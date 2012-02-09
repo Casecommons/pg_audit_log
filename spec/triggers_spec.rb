@@ -17,6 +17,23 @@ describe PgAuditLog::Triggers do
     PgAuditLog::Triggers.drop_for_table(TableWithoutTriggers.table_name) rescue nil
   end
 
+  describe ".tables" do
+    subject { PgAuditLog::Triggers.tables }
+
+    with_model :table_to_ignore do
+      table {}
+    end
+
+    before do
+      PgAuditLog::IGNORED_TABLES << /ignore/
+    end
+
+    it { should include(TableWithTriggers.table_name) }
+    it { should include(TableWithoutTriggers.table_name) }
+    it { should_not include(PgAuditLog::Entry.table_name) }
+    it { should_not include(TableToIgnore.table_name) }
+  end
+
   describe ".tables_with_triggers" do
     it "should return an array of all tables that do have an audit trigger installed" do
       PgAuditLog::Triggers.tables_with_triggers.should include(TableWithTriggers.table_name)
