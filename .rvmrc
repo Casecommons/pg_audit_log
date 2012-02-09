@@ -1,1 +1,1 @@
-rvm 1.9.2@pg_audit_log --create
+rvm 1.9.3-p0@pg_audit_log --create
