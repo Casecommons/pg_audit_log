@@ -1,3 +1,4 @@
+.vimlog
 *.gem
 *~
 .DS_Store
