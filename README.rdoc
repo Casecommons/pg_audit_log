@@ -9,7 +9,9 @@ Comes with specs for your project and a rake task to generate the reverse SQL to
 
 All SQL INSERTs, UPDATEs, and DELETEs will be captured. Record columns that do not change do not generate an audit log entry.
 
-Compatible with Rails 3.0.x and 3.1.x
+Compatible with Rails 3.0.x, 3.1.x and 3.2.x
+
+On a 2.93GHz i7 with postgresql 9.1 the audit log has an overhead of about 0.0035 seconds to each INSERT, UPDATE or DELETE
 
 == INSTALL
 
