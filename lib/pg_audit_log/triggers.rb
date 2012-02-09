@@ -11,7 +11,7 @@ module PgAuditLog
 
     class << self
       def tables
-        skip_tables = (PgAuditLog::IGNORED_TABLES + [PgAuditLog::Entry.table_name])
+        skip_tables = (PgAuditLog::IGNORED_TABLES + [PgAuditLog::Entry.table_name, /#{PgAuditLog::Entry.table_name}_[0-9]{6}/])
         connection.tables.reject do |table|
           skip_tables.include?(table) ||
             skip_tables.any? { |skip_table| skip_table =~ table if skip_table.is_a? Regexp }

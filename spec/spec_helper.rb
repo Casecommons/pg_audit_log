@@ -18,12 +18,12 @@ rescue PGError => e
   raise e
 end
 
-
 RSpec.configure do |config|
   config.mock_with :rspec
   config.extend WithModel
 
   config.before(:each) do
+    PgAuditLog::Entry.uninstall rescue nil
     connection.tables.each do |table|
       connection.drop_table_without_auditing(table)
     end

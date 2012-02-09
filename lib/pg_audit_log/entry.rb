@@ -41,12 +41,45 @@ class PgAuditLog::Entry < ActiveRecord::Base
         );
 
         ALTER SEQUENCE #{self.table_name}_id_seq OWNED BY #{self.table_name}.id;
+
+        CREATE OR REPLACE FUNCTION audit_log_insert_trigger()
+        RETURNS TRIGGER AS $$
+        DECLARE
+          tablename TEXT;
+          insert_sql TEXT;
+          create_table_sql TEXT;
+          month_start DATE;
+          month_end DATE;
+        BEGIN
+          tablename := '#{self.table_name}_' || to_char(NEW.occurred_at, 'YYYYMM');
+          insert_sql := 'INSERT INTO ' || tablename || ' VALUES($1.*)';
+          EXECUTE insert_sql USING NEW;
+          RETURN NULL;
+        EXCEPTION
+          WHEN null_value_not_allowed THEN
+            RETURN NULL;
+          WHEN undefined_table THEN
+            EXECUTE 'SELECT to_char($1, ''YYYY-MM-01'')::DATE' INTO month_start USING NEW.occurred_at;
+            EXECUTE 'SELECT ($1 +  INTERVAL ''1 MONTH'')' INTO month_end USING month_start;
+            create_table_sql :=  'CREATE TABLE ' || tablename || ' ( CHECK ( date(occurred_at) >= DATE ''' || month_start || ''' AND date(occurred_at) < DATE ''' ||
+              month_end || ''' ) ) INHERITS (#{self.table_name})';
+            EXECUTE create_table_sql;
+            EXECUTE 'CREATE INDEX ' || tablename || '_occurred_at ON ' || tablename || ' (date(occurred_at))';
+            EXECUTE insert_sql USING NEW;
+            RETURN NULL;
+        END;
+        $$
+        LANGUAGE plpgsql;
+
+        CREATE TRIGGER insert_audit_log_trigger
+          BEFORE INSERT ON audit_log
+          FOR EACH ROW EXECUTE PROCEDURE audit_log_insert_trigger();
       SQL
       connection.execute_without_auditing(sql)
     end
 
     def uninstall
-      connection.execute("DROP TABLE IF EXISTS #{self.table_name}")
+      connection.execute("DROP TABLE IF EXISTS #{self.table_name} CASCADE")
     end
 
     def delete(id)
