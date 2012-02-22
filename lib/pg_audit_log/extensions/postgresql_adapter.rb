@@ -37,16 +37,17 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
 
   def set_audit_user_id_and_name
     user_id, unique_name = user_id_and_name
-    execute PgAuditLog::Function::user_identifier_temporary_function(user_id) unless @last_user_id && @last_user_id == user_id
-    execute PgAuditLog::Function::user_unique_name_temporary_function(unique_name) unless @last_unique_name && @last_unique_name == unique_name
+    return true if (@last_user_id && @last_user_id == user_id) && (@last_unique_name && @last_unique_name == unique_name)
+
+    execute_without_pg_audit_log PgAuditLog::Function::user_identifier_temporary_function(user_id)
+    execute_without_pg_audit_log PgAuditLog::Function::user_unique_name_temporary_function(unique_name)
     @last_user_id = user_id
     @last_unique_name = unique_name
+
     true
   end
 
   def blank_audit_user_id_and_name
-    execute 'DROP FUNCTION pg_temp.pg_audit_log_user_identifier()'
-    execute 'DROP FUNCTION pg_temp.pg_audit_log_user_unique_name()'
     @last_user_id = @last_unique_name = nil
     true
   end
@@ -57,6 +58,22 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   end
   alias_method_chain :reconnect!, :pg_audit_log
 
+  def execute_with_pg_audit_log(sql, name = nil)
+    conn = execute_without_pg_audit_log(sql, name = nil)
+    set_audit_user_id_and_name
+    conn
+  end
+  alias_method_chain :execute, :pg_audit_log
+
+  if ::ActiveRecord::VERSION::MAJOR >= 3 && ::ActiveRecord::VERSION::MINOR >= 1
+    def exec_query_with_pg_audit_log(sql, name = 'SQL', binds = [])
+      conn = exec_query_without_pg_audit_log(sql, name, binds)
+      set_audit_user_id_and_name
+      conn
+    end
+    alias_method_chain :exec_query, :pg_audit_log
+  end
+
   private
 
   def user_id_and_name
@@ -66,28 +83,4 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     return [user_id, user_unique_name]
   end
 
-end
-
-module ActiveRecord
-  module ConnectionAdapters
-    class ConnectionPool
-      def release_connection_with_pg_audit_log(with_id = current_connection_id)
-        conn = @reserved_connections.delete(with_id)
-        conn.blank_audit_user_id_and_name
-        checkin conn if conn
-      end
-      alias_method_chain :release_connection, :pg_audit_log
-    end
-  end
-
-  class Base
-    class << self
-      def retrieve_connection_with_pg_audit_log
-        conn = retrieve_connection_without_pg_audit_log
-        conn.set_audit_user_id_and_name
-        conn
-      end
-      alias_method_chain :retrieve_connection, :pg_audit_log
-    end
-  end
 end
