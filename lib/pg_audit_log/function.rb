@@ -22,29 +22,11 @@ module PgAuditLog
       end
 
       def user_identifier_temporary_function(user_id)
-        sql = <<-SQL
-          CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_identifier() RETURNS integer
-          LANGUAGE plpgsql
-          AS $_$
-            BEGIN
-              RETURN #{user_id};
-            END
-            $_$;
-        SQL
-        sql.split("\n").join(" ")
+        "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_identifier() RETURNS integer AS 'SELECT #{user_id}' LANGUAGE SQL STABLE;"
       end
 
       def user_unique_name_temporary_function(username)
-        sql = <<-SQL
-          CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar
-          LANGUAGE plpgsql
-          AS $_$
-            BEGIN
-              RETURN '#{username}';
-            END
-            $_$;
-        SQL
-        sql.split("\n").join(" ")
+        "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar AS $_$ SELECT '#{username}'::varchar $_$ LANGUAGE SQL STABLE;"
       end
 
       def install

@@ -52,6 +52,12 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     true
   end
 
+  def reconnect_with_pg_audit_log!
+    reconnect_without_pg_audit_log!
+    @last_user_id = @last_unique_name = nil
+  end
+  alias_method_chain :reconnect!, :pg_audit_log
+
   private
 
   def user_id_and_name
@@ -73,13 +79,6 @@ module ActiveRecord
       end
       alias_method_chain :release_connection, :pg_audit_log
     end
-
-    class ConnectionHandler
-      def establish_connection_with_pg_audit_log(name, spec)
-        establish_connection_without_pg_audit_log(name, spec)
-      end
-       alias_method_chain :establish_connection, :pg_audit_log
-    end
   end
 
   class Base
@@ -90,11 +89,6 @@ module ActiveRecord
         conn
       end
       alias_method_chain :retrieve_connection, :pg_audit_log
-
-      def establish_connection_with_pg_audit_log(spec = nil)
-        establish_connection_without_pg_audit_log(spec)
-      end
-      alias_method_chain :establish_connection, :pg_audit_log
     end
   end
 end
