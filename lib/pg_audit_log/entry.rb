@@ -75,7 +75,7 @@ class PgAuditLog::Entry < ActiveRecord::Base
           BEFORE INSERT ON audit_log
           FOR EACH ROW EXECUTE PROCEDURE audit_log_insert_trigger();
       SQL
-      connection.execute_without_auditing(sql)
+      connection.execute(sql)
     end
 
     def uninstall

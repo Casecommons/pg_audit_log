@@ -8,7 +8,7 @@ module PgAuditLog
       end
 
       def execute(sql)
-        connection.execute_without_auditing(sql)
+        connection.execute(sql)
       end
     end
   end
