@@ -2,30 +2,6 @@ require "active_record/connection_adapters/postgresql_adapter"
 
 # Did not want to reopen the class but sending an include seemingly is not working.
 class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
-  def begin_db_transaction
-    execute_without_auditing "BEGIN"
-  end
-
-  def commit_db_transaction
-    execute_without_auditing "COMMIT"
-  end
-
-  def rollback_db_transaction
-    execute_without_auditing "ROLLBACK"
-  end
-
-  def create_savepoint
-    execute_without_auditing("SAVEPOINT #{current_savepoint_name}")
-  end
-
-  def rollback_to_savepoint
-    execute_without_auditing("ROLLBACK TO SAVEPOINT #{current_savepoint_name}")
-  end
-
-  def release_savepoint
-    execute_without_auditing("RELEASE SAVEPOINT #{current_savepoint_name}")
-  end
-
   def drop_table_with_auditing(table_name, options = {})
     if PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
       PgAuditLog::Triggers.drop_for_table(table_name)
@@ -60,6 +36,22 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   end
   alias_method_chain :rename_table, :auditing
 
+  def set_audit_user_id_and_name
+    user_id, unique_name = user_id_and_name
+    execute PgAuditLog::Function::user_identifier_temporary_function(user_id) unless @last_user_id && @last_user_id == user_id
+    execute PgAuditLog::Function::user_unique_name_temporary_function(unique_name) unless @last_unique_name && @last_unique_name == unique_name
+    @last_user_id = user_id
+    @last_unique_name = unique_name
+    true
+  end
+
+  def blank_audit_user_id_and_name
+    execute 'DROP FUNCTION pg_temp.pg_audit_log_user_identifier()'
+    execute 'DROP FUNCTION pg_temp.pg_audit_log_user_unique_name()'
+    @last_user_id = @last_unique_name = nil
+    true
+  end
+
   private
 
   def user_id_and_name
@@ -69,4 +61,40 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     return [user_id, user_unique_name]
   end
 
+end
+
+module ActiveRecord
+  module ConnectionAdapters
+    class ConnectionPool
+      def release_connection_with_pg_audit_log(with_id = current_connection_id)
+        conn = @reserved_connections.delete(with_id)
+        conn.blank_audit_user_id_and_name
+        checkin conn if conn
+      end
+      alias_method_chain :release_connection, :pg_audit_log
+    end
+
+    class ConnectionHandler
+      def establish_connection_with_pg_audit_log(name, spec)
+        establish_connection_without_pg_audit_log(name, spec)
+      end
+       alias_method_chain :establish_connection, :pg_audit_log
+    end
+  end
+
+  class Base
+    class << self
+      def retrieve_connection_with_pg_audit_log
+        conn = retrieve_connection_without_pg_audit_log
+        conn.set_audit_user_id_and_name
+        conn
+      end
+      alias_method_chain :retrieve_connection, :pg_audit_log
+
+      def establish_connection_with_pg_audit_log(spec = nil)
+        establish_connection_without_pg_audit_log(spec)
+      end
+      alias_method_chain :establish_connection, :pg_audit_log
+    end
+  end
 end
