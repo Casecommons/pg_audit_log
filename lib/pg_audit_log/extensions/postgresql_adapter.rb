@@ -25,12 +25,11 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   alias_method_chain :create_table, :auditing
 
   def rename_table_with_auditing(table_name, new_name)
-    rename_table_without_auditing(table_name, new_name)
     if PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
       PgAuditLog::Triggers.drop_for_table(table_name)
     end
-    unless PgAuditLog::IGNORED_TABLES.include?(table_name) ||
-      PgAuditLog::Triggers.tables_with_triggers.include?(new_name)
+    rename_table_without_auditing(table_name, new_name)
+    unless PgAuditLog::IGNORED_TABLES.include?(table_name) || PgAuditLog::Triggers.tables_with_triggers.include?(new_name)
       PgAuditLog::Triggers.create_for_table(new_name)
     end
   end

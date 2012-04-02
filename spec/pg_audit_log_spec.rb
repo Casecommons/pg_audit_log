@@ -265,12 +265,23 @@ describe PgAuditLog do
     end
 
     describe "when renaming the table" do
+      def trigger_names
+        connection.select_values <<-SQL
+          SELECT triggers.tgname as trigger_name
+          FROM pg_trigger triggers
+          WHERE triggers.tgname LIKE '#{PgAuditLog::Triggers.trigger_prefix}%'
+        SQL
+      end
+
       it "should automatically drop and create the trigger" do
         new_table_name = "new_table_#{Time.now.to_i}"
         connection.create_table("test_table")
         connection.rename_table("test_table", new_table_name)
-        PgAuditLog::Triggers.tables_with_triggers.should_not include("test_table")
+
+        trigger_names.should_not include("audit_test_table")
+        trigger_names.should include("audit_#{new_table_name}")
         PgAuditLog::Triggers.tables_with_triggers.should include(new_table_name)
+
         connection.drop_table(new_table_name) rescue nil
       end
     end
