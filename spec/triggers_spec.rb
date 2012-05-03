@@ -110,10 +110,27 @@ describe PgAuditLog::Triggers do
       end
 
       it "should not fire the audit" do
+        PgAuditLog::Function.install
+
         PgAuditLog::Triggers.disable
         expect {
           TableWithTriggers.create!
         }.to_not change(PgAuditLog::Entry, :count)
+      end
+    end
+
+    describe ".without_triggers" do
+      it "should record the user correctly afterwards" do
+        PgAuditLog::Triggers.without_triggers do
+          expect {
+            TableWithTriggers.create!
+          }.to_not change(PgAuditLog::Entry, :count)
+        end
+
+        expect {
+          TableWithTriggers.create!
+        }.to change(PgAuditLog::Entry, :count)
+        PgAuditLog::Entry.last.user_id.should == -1
       end
     end
 

@@ -47,6 +47,10 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     true
   end
 
+  def set_user_id(user_id = nil)
+    execute_without_pg_audit_log PgAuditLog::Function::user_identifier_temporary_function(user_id || @last_user_id)
+  end
+
   def blank_audit_user_id_and_name
     @last_user_id = @last_unique_name = nil
     true

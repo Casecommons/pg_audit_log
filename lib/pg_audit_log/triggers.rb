@@ -49,15 +49,11 @@ module PgAuditLog
       end
 
       def enable
-        tables_with_triggers.each do |table|
-          enable_for_table(table)
-        end
+        connection.set_user_id(nil)
       end
 
       def disable
-        tables_with_triggers.each do |table|
-          disable_for_table(table)
-        end
+        connection.set_user_id(PgAuditLog::Function::DISABLED_USER)
       end
 
       def without_triggers

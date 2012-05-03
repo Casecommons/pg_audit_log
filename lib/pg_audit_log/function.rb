@@ -1,5 +1,7 @@
 module PgAuditLog
   class Function < PgAuditLog::ActiveRecord
+    DISABLED_USER = -2396
+
     class << self
       def name
         "audit_changes"
@@ -45,6 +47,11 @@ module PgAuditLog
               unique_name varchar;
               column_name varchar;
             BEGIN
+              user_identifier := pg_temp.pg_audit_log_user_identifier();
+              IF user_identifier = #{DISABLED_USER} THEN
+                RETURN NULL;
+              END IF;
+              unique_name := pg_temp.pg_audit_log_user_unique_name();
               primary_key_column := NULL;
               EXECUTE 'SELECT pg_attribute.attname
                        FROM pg_index, pg_class, pg_attribute
@@ -54,8 +61,6 @@ module PgAuditLog
                        AND pg_attribute.attnum = any(pg_index.indkey)
                        AND indisprimary'
               INTO primary_key_column USING TG_RELNAME;
-              user_identifier := pg_temp.pg_audit_log_user_identifier();
-              unique_name := pg_temp.pg_audit_log_user_unique_name();
               primary_key_value := NULL;
 
               FOR col IN SELECT * FROM information_schema.columns WHERE table_name = TG_RELNAME LOOP
