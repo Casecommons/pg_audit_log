@@ -17,4 +17,13 @@ describe PgAuditLog::Function do
       it { should be_true }
     end
   end
+
+  describe ".user_unique_name_temporary_function" do
+    subject { PgAuditLog::Function.user_unique_name_temporary_function(email) }
+    let(:email) { "o'connell@fred.com" }
+
+    it "escapes the email" do
+      subject.should match("'o''connell@fred.com'::varchar")
+    end
+  end
 end

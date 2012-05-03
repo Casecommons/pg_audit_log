@@ -26,7 +26,7 @@ module PgAuditLog
       end
 
       def user_unique_name_temporary_function(username)
-        "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar AS $_$ SELECT '#{username}'::varchar $_$ LANGUAGE SQL STABLE;"
+        "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar AS $_$ SELECT '#{PGconn.escape_bytea(username)}'::varchar $_$ LANGUAGE SQL STABLE;"
       end
 
       def install
