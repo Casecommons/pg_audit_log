@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/Casecommons/pg_audit_log"
   s.summary     = %q{postgresql only database-level audit logging of all databases changes}
   s.description = %q{A completely transparent audit logging component for your application using a stored procedure and triggers. Comes with specs for your project and a rake task to generate the reverse SQL to undo changes logged}
+  s.post_install_message = %q{Please run PgAuditLog::Function.install (in console/migration) to install the new versions of the database functions}
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
