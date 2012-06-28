@@ -23,12 +23,24 @@ module PgAuditLog
         "last_accessed_at"
       end
 
+      def pg_audit_log_old_style_user_id
+        defined?(Rails) && Rails.configuration.pg_audit_log_old_style_user_id rescue false
+      end
+
       def user_identifier_temporary_function(user_id)
-        "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_identifier() RETURNS integer AS 'SELECT #{user_id}' LANGUAGE SQL STABLE;"
+        if pg_audit_log_old_style_user_id
+          "SET audit.user_id = #{user_id || -1};"
+        else
+          "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_identifier() RETURNS integer AS 'SELECT #{user_id}' LANGUAGE SQL STABLE;"
+        end
       end
 
       def user_unique_name_temporary_function(username)
-        "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar AS $_$ SELECT '#{PGconn.escape_bytea(username)}'::varchar $_$ LANGUAGE SQL STABLE;"
+        if pg_audit_log_old_style_user_id
+          "SET audit.user_unique_name = '#{PGconn.escape_bytea(username)}';"
+        else
+          "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar AS $_$ SELECT '#{PGconn.escape_bytea(username)}'::varchar $_$ LANGUAGE SQL STABLE;"
+        end
       end
 
       def install
@@ -47,11 +59,11 @@ module PgAuditLog
               unique_name varchar;
               column_name varchar;
             BEGIN
-              user_identifier := pg_temp.pg_audit_log_user_identifier();
+              user_identifier := #{pg_audit_log_old_style_user_id ? "current_setting('audit.user_id')" : 'pg_temp.pg_audit_log_user_identifier()'};
               IF user_identifier = #{DISABLED_USER} THEN
                 RETURN NULL;
               END IF;
-              unique_name := pg_temp.pg_audit_log_user_unique_name();
+              unique_name := #{pg_audit_log_old_style_user_id ? "current_setting('audit.user_unique_name')" : 'pg_temp.pg_audit_log_user_unique_name()'};
               primary_key_column := NULL;
               EXECUTE 'SELECT pg_attribute.attname
                        FROM pg_index, pg_class, pg_attribute
