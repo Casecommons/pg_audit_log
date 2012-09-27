@@ -125,7 +125,7 @@ module PgAuditLog
       end
 
       def uninstall
-        execute "DROP FUNCTION #{name}()"
+        execute "DROP FUNCTION IF EXISTS #{name}() CASCADE"
       end
 
       def installed?
