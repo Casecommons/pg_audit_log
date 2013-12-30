@@ -68,7 +68,7 @@ describe PgAuditLog do
         it "captures all new values for all fields" do
           attributes.each do |field_name, value|
             if field_name == :dt
-              PgAuditLog::Entry.where(:field_name => field_name).last.field_value_new.should == value.strftime("%Y-%m-%d %H:%M:%S")
+              PgAuditLog::Entry.where(:field_name => field_name).last.field_value_new.should == value.utc.strftime("%Y-%m-%d %H:%M:%S")
             else
               PgAuditLog::Entry.where(:field_name => field_name).last.field_value_new.should == value.to_s
             end
@@ -202,7 +202,7 @@ describe PgAuditLog do
         it "captures all new values for all fields" do
           attributes.each do |field_name, value|
             if field_name == :dt
-              PgAuditLog::Entry.where(:field_name => field_name).last.field_value_old.should == value.strftime("%Y-%m-%d %H:%M:%S")
+              PgAuditLog::Entry.where(:field_name => field_name).last.field_value_old.should == value.utc.strftime("%Y-%m-%d %H:%M:%S")
             else
               PgAuditLog::Entry.where(:field_name => field_name).last.field_value_old.should == value.to_s
             end
