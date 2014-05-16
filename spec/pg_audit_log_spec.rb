@@ -50,7 +50,7 @@ describe PgAuditLog do
 
         context "when a user is present" do
           before do
-            Thread.current[:current_user] = stub('User', :id => 1, :unique_name => 'my current user')
+            Thread.current[:current_user] = double('User', :id => 1, :unique_name => 'my current user')
             AuditedModel.create!
           end
 
