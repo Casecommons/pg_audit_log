@@ -5,7 +5,6 @@ require 'pg_audit_log/version'
 Gem::Specification.new do |s|
   s.name        = 'pg_audit_log'
   s.version     = PgAuditLog::VERSION
-  s.platform    = Gem::Platform::RUBY
   s.authors     = ['Case Commons, LLC']
   s.email       = ['casecommons-dev@googlegroups.com']
   s.homepage    = 'https://github.com/Casecommons/pg_audit_log'
