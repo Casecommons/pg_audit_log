@@ -22,6 +22,8 @@ rescue PGError => e
   raise e
 end
 
+ActiveRecord::Base.default_timezone = :local
+
 RSpec.configure do |config|
   config.mock_with :rspec
   config.extend WithModel
