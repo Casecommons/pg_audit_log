@@ -75,7 +75,6 @@ describe PgAuditLog do
             entry.field_value_old.should be_nil
           end
         end
-
       end
 
       context "the audit log record without a primary key" do
