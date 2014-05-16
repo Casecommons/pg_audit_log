@@ -10,11 +10,13 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'https://github.com/Casecommons/pg_audit_log'
   spec.summary     = %q{PostgreSQL-only database-level audit logging of all databases changes.}
   spec.description = %q{A completely transparent audit logging component for your application using a stored procedure and triggers. Comes with specs for your project and a rake task to generate the reverse SQL to undo changes logged.}
+  spec.license     = 'MIT'
+
   spec.post_install_message = %q{Please run PgAuditLog::Function.install (in console/migration) to install the new versions of the database functions}
 
-  spec.files         = `git ls-files`.split("\n")
-  spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  spec.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  spec.files         = `git ls-files`.split($/)
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
   spec.add_dependency 'rails', '~> 3.1'
