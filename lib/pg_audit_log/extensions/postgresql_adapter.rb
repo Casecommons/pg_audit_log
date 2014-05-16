@@ -69,14 +69,12 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   end
   alias_method_chain :execute, :pg_audit_log
 
-  if ::ActiveRecord::VERSION::MAJOR >= 3 && ::ActiveRecord::VERSION::MINOR >= 1
-    def exec_query_with_pg_audit_log(sql, name = 'SQL', binds = [])
-      conn = exec_query_without_pg_audit_log(sql, name, binds)
-      set_audit_user_id_and_name
-      conn
-    end
-    alias_method_chain :exec_query, :pg_audit_log
+  def exec_query_with_pg_audit_log(sql, name = 'SQL', binds = [])
+    conn = exec_query_without_pg_audit_log(sql, name, binds)
+    set_audit_user_id_and_name
+    conn
   end
+  alias_method_chain :exec_query, :pg_audit_log
 
   private
 
