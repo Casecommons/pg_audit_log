@@ -53,7 +53,7 @@ On a 2.93GHz i7 with PostgreSQL 9.1 the audit log has an overhead of about 0.003
 
 - ActiveRecord
 - PostgreSQL
-- Rails 3.x
+- Rails 3.1 or 3.2
 
 ## LICENSE
 
