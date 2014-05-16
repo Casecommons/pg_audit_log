@@ -1,5 +1,9 @@
 # pg_audit_log
 
+[![Build Status](https://secure.travis-ci.org/Casecommons/pg_audit_log.png?branch=master)](https://travis-ci.org/Casecommons/pg_audit_log)
+[![Code Climate](https://codeclimate.com/github/Casecommons/pg_audit_log.png)](https://codeclimate.com/github/Casecommons/pg_audit_log)
+[![Gem Version](https://badge.fury.io/rb/pg_audit_log.png)](https://rubygems.org/gems/pg_audit_log)
+
 ## Description
 
 PostgreSQL-only database-level audit logging of all databases changes using a completely transparent stored procedure and triggers.
