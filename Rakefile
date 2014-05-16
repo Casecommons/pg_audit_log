@@ -1,12 +1,7 @@
-require 'rake'
-require 'rspec/core'
+require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
 
-require 'bundler'
-Bundler::GemHelper.install_tasks
+desc 'Run specs'
+RSpec::Core::RakeTask.new
 
 task :default => :spec
-
-desc "Run all specs in spec directory (excluding plugin specs)"
-RSpec::Core::RakeTask.new(:spec)
-
