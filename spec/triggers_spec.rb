@@ -155,7 +155,5 @@ describe PgAuditLog::Triggers do
         end
       end
     end
-
   end
 end
-

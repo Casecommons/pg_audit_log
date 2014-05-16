@@ -1,7 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe PgAuditLog::Entry do
-
   subject { PgAuditLog::Entry.create! }
 
   describe ".delete" do
