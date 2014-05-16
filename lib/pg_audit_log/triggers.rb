@@ -57,12 +57,10 @@ module PgAuditLog
       end
 
       def without_triggers
-        begin
-          disable
-          yield
-        ensure
-          enable
-        end
+        disable
+        yield
+      ensure
+        enable
       end
 
       def create_for_table(table_name)
@@ -70,11 +68,11 @@ module PgAuditLog
         PgAuditLog::Function.install unless PgAuditLog::Function.installed?
         return if tables_with_triggers.include?(table_name)
         execute <<-SQL
-        CREATE TRIGGER #{trigger_name_for_table(table_name)}
-        AFTER INSERT OR UPDATE OR DELETE
-        ON #{table_name}
-        FOR EACH ROW
-        EXECUTE PROCEDURE #{PgAuditLog::Function.name}()
+          CREATE TRIGGER #{trigger_name_for_table(table_name)}
+          AFTER INSERT OR UPDATE OR DELETE
+          ON #{table_name}
+          FOR EACH ROW
+          EXECUTE PROCEDURE #{PgAuditLog::Function.name}()
         SQL
       end
 
@@ -92,7 +90,7 @@ module PgAuditLog
       end
 
       def trigger_prefix
-        "audit_"
+        'audit_'
       end
 
       def trigger_name_for_table(table_name)

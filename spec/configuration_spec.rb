@@ -6,7 +6,6 @@ describe "the PostgreSQL database" do
   end
 
   it "has an audit log table" do
-    ActiveRecord::Base.connection.table_exists?("audit_log").should be_true
+    ActiveRecord::Base.connection.table_exists?('audit_log').should be_true
   end
-
 end

@@ -1,20 +1,22 @@
-require "bundler/setup"
-require "pg_audit_log"
-require "with_model"
+require 'bundler/setup'
+require 'pg_audit_log'
+require 'with_model'
 
 connection = nil
 begin
-  ActiveRecord::Base.establish_connection(:adapter  => 'postgresql',
-                                          :database => 'pg_audit_log_test',
-                                          :min_messages => 'warning')
+  ActiveRecord::Base.establish_connection({
+    :adapter  => 'postgresql',
+    :database => 'pg_audit_log_test',
+    :min_messages => 'warning',
+  })
   connection = ActiveRecord::Base.connection
-  connection.execute("SELECT 1")
+  connection.execute('SELECT 1')
 rescue PGError => e
-  puts "-" * 80
-  puts "Unable to connect to database.  Please run:"
+  puts '-' * 80
+  puts 'Unable to connect to database.  Please run:'
   puts
-  puts "    createdb pg_audit_log_test"
-  puts "-" * 80
+  puts '    createdb pg_audit_log_test'
+  puts '-' * 80
   raise e
 end
 

@@ -4,23 +4,23 @@ module PgAuditLog
 
     class << self
       def name
-        "audit_changes"
+        'audit_changes'
       end
 
       def users_table_name
-        "users"
+        'users'
       end
 
       def user_id_field
-        "user_id"
+        'user_id'
       end
 
       def user_name_field
-        "user_unique_name"
+        'user_unique_name'
       end
 
       def users_access_column
-        "last_accessed_at"
+        'last_accessed_at'
       end
 
       def pg_audit_log_old_style_user_id
@@ -59,11 +59,11 @@ module PgAuditLog
               unique_name varchar;
               column_name varchar;
             BEGIN
-              user_identifier := #{pg_audit_log_old_style_user_id ? "current_setting('audit.user_id')" : 'pg_temp.pg_audit_log_user_identifier()'};
+              user_identifier := #{pg_audit_log_old_style_user_id ? %q(current_setting('audit.user_id')) : 'pg_temp.pg_audit_log_user_identifier()'};
               IF user_identifier = #{DISABLED_USER} THEN
                 RETURN NULL;
               END IF;
-              unique_name := #{pg_audit_log_old_style_user_id ? "current_setting('audit.user_unique_name')" : 'pg_temp.pg_audit_log_user_unique_name()'};
+              unique_name := #{pg_audit_log_old_style_user_id ? %q(current_setting('audit.user_unique_name')) : 'pg_temp.pg_audit_log_user_unique_name()'};
               primary_key_column := NULL;
               EXECUTE 'SELECT pg_attribute.attname
                        FROM pg_index, pg_class, pg_attribute

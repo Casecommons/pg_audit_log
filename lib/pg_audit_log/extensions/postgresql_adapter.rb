@@ -1,4 +1,4 @@
-require "active_record/connection_adapters/postgresql_adapter"
+require 'active_record/connection_adapters/postgresql_adapter'
 
 # Did not want to reopen the class but sending an include seemingly is not working.
 class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
@@ -86,5 +86,4 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     user_unique_name = current_user.try(:unique_name) || "UNKNOWN"
     return [user_id, user_unique_name]
   end
-
 end
