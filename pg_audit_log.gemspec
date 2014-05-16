@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rails', '~> 3.0'
   s.add_dependency 'pg', '>= 0.9.0'
+  s.add_development_dependency 'rspec'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'with_model', '>= 0.1.3'
 end
