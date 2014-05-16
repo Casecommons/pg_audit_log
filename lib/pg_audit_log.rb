@@ -1,5 +1,9 @@
 module PgAuditLog
-  IGNORED_TABLES = ['plugin_schema_migrations', 'sessions', 'schema_migrations']
+  IGNORED_TABLES = [
+    'plugin_schema_migrations'.freeze,
+    'sessions'.freeze,
+    'schema_migrations'.freeze,
+  ]
 end
 
 require 'active_record'
