@@ -1,6 +1,6 @@
 module PgAuditLog
   class Triggers < PgAuditLog::ActiveRecord
-    class MissingTriggers < Exception
+    class MissingTriggers < StandardError
       def initialize(tables)
         @tables = tables
       end
