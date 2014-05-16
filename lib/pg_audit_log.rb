@@ -5,8 +5,6 @@ end
 require 'active_record'
 require 'pg_audit_log/version'
 
-raise "ActiveRecord #{::ActiveRecord::VERSION::MAJOR}.x unsupported!" unless ::ActiveRecord::VERSION::MAJOR == 3
-
 require 'pg_audit_log/extensions/postgresql_adapter.rb'
 require 'pg_audit_log/active_record'
 require 'pg_audit_log/entry'
