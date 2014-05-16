@@ -30,16 +30,15 @@ describe PgAuditLog do
       PgAuditLog::Entry.connection.execute("TRUNCATE #{PgAuditLog::Entry.quoted_table_name}")
     end
 
-    let(:attributes) { { :str => 'foo', :txt => 'bar', :int => 5, :date => Date.today, :dt => Time.now.midnight } }
+    let(:attributes) { { :str => 'foo', :txt => 'bar', :int => 5, :date => Date.current, :dt => Time.current.midnight } }
 
     describe "on create" do
       context "the audit log record with a primary key" do
-
         before do
           AuditedModel.create!(attributes)
         end
 
-        subject { PgAuditLog::Entry.last(:conditions => { :field_name => "str" }) }
+        subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
         it { should be }
         its(:occurred_at) { should be }
@@ -67,12 +66,13 @@ describe PgAuditLog do
 
         it "captures all new values for all fields" do
           attributes.each do |field_name, value|
+            entry = PgAuditLog::Entry.where(:field_name => field_name).last
             if field_name == :dt
-              PgAuditLog::Entry.last(:conditions => { :field_name => field_name }).field_value_new.should == value.strftime("%Y-%m-%d %H:%M:%S")
+              entry.field_value_new.should == value.strftime("%Y-%m-%d %H:%M:%S")
             else
-              PgAuditLog::Entry.last(:conditions => { :field_name => field_name }).field_value_new.should == value.to_s
+              entry.field_value_new.should == value.to_s
             end
-            PgAuditLog::Entry.last(:conditions => { :field_name => field_name }).field_value_old.should be_nil
+            entry.field_value_old.should be_nil
           end
         end
       end
@@ -82,7 +82,7 @@ describe PgAuditLog do
           AuditedModelWithoutPrimaryKey.create!(attributes)
         end
 
-        subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'str' }) }
+        subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
         it { should be }
         its(:field_name) { should == 'str' }
@@ -98,7 +98,7 @@ describe PgAuditLog do
 
         context "when going from a value to a another value" do
           before { @model.update_attributes!(:str => 'bar') }
-          subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'str' }) }
+          subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
           its(:operation) { should == 'UPDATE' }
           its(:field_value_new) { should == 'bar' }
@@ -108,7 +108,7 @@ describe PgAuditLog do
         context "when going from nil to a value" do
           let(:attributes) { {:txt => nil} }
           before { @model.update_attributes!(:txt => 'baz') }
-          subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'txt' }) }
+          subject { PgAuditLog::Entry.where(:field_name => 'txt').last }
 
           its(:field_value_new) { should == 'baz' }
           its(:field_value_old) { should be_nil }
@@ -116,7 +116,7 @@ describe PgAuditLog do
 
         context "when going from a value to nil" do
           before { @model.update_attributes!(:str => nil) }
-          subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'str' }) }
+          subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
           its(:field_value_new) { should be_nil }
           its(:field_value_old) { should == 'foo' }
@@ -124,7 +124,7 @@ describe PgAuditLog do
 
         context "when the value does not change" do
           before { @model.update_attributes!(:str => 'foo') }
-          subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'str', :operation => 'UPDATE' }) }
+          subject { PgAuditLog::Entry.where(:field_name => 'str', :operation => 'UPDATE').last }
 
           it { should_not be }
         end
@@ -132,7 +132,7 @@ describe PgAuditLog do
         context "when the value is nil and does not change" do
           let(:attributes) { {:txt => nil} }
           before { @model.update_attributes!(:txt => nil) }
-          subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'txt', :operation => 'UPDATE' }) }
+          subject { PgAuditLog::Entry.where(:field_name => 'txt', :operation => 'UPDATE').last }
 
           it { should_not be }
         end
@@ -140,7 +140,7 @@ describe PgAuditLog do
         context "when the value is a boolean" do
           context "going from nil -> true" do
             before { @model.update_attributes!(:bool => true) }
-            subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'bool', :operation => 'UPDATE' }) }
+            subject { PgAuditLog::Entry.where(:field_name => 'bool', :operation => 'UPDATE').last }
 
             its(:field_value_new) { should == 'true' }
             its(:field_value_old) { should be_nil }
@@ -151,7 +151,7 @@ describe PgAuditLog do
             before do
               @model.update_attributes!(:bool => true)
             end
-            subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'bool', :operation => 'UPDATE' }) }
+            subject { PgAuditLog::Entry.where(:field_name => 'bool', :operation => 'UPDATE').last }
 
             its(:field_value_new) { should == 'true' }
             its(:field_value_old) { should == 'false' }
@@ -163,7 +163,7 @@ describe PgAuditLog do
             before do
               @model.update_attributes!(:bool => false)
             end
-            subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'bool', :operation => 'UPDATE' }) }
+            subject { PgAuditLog::Entry.where(:field_name => 'bool', :operation => 'UPDATE').last }
 
             its(:field_value_new) { should == 'false' }
             its(:field_value_old) { should == 'true' }
@@ -177,7 +177,7 @@ describe PgAuditLog do
           AuditedModelWithoutPrimaryKey.update_all(:str => 'bar')
         end
 
-        subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'str' }) }
+        subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
         its(:primary_key) { should be_nil }
       end
@@ -190,18 +190,19 @@ describe PgAuditLog do
           model.delete
         end
 
-        subject { PgAuditLog::Entry.last(:conditions => { :field_name => 'str' }) }
+        subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
         its(:operation) { should == 'DELETE' }
 
         it "captures all new values for all fields" do
           attributes.each do |field_name, value|
+            entry = PgAuditLog::Entry.where(:field_name => field_name).last
             if field_name == :dt
-              PgAuditLog::Entry.last(:conditions => { :field_name => field_name }).field_value_old.should == value.strftime('%Y-%m-%d %H:%M:%S')
+              entry.field_value_old.should == value.strftime('%Y-%m-%d %H:%M:%S')
             else
-              PgAuditLog::Entry.last(:conditions => { :field_name => field_name }).field_value_old.should == value.to_s
+              entry.field_value_old.should == value.to_s
             end
-            PgAuditLog::Entry.last(:conditions => { :field_name => field_name }).field_value_new.should be_nil
+            entry.field_value_new.should be_nil
           end
         end
       end
@@ -212,7 +213,7 @@ describe PgAuditLog do
           AuditedModelWithoutPrimaryKey.delete_all
         end
 
-        subject { PgAuditLog::Entry.last(:conditions => { :field_name => "str" }) }
+        subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
         its(:primary_key) { should be_nil }
       end
@@ -268,7 +269,7 @@ describe PgAuditLog do
       end
 
       it "should automatically drop and create the trigger" do
-        new_table_name = "new_table_#{Time.now.to_i}"
+        new_table_name = "new_table_#{Time.current.to_i}"
         connection.create_table('test_table')
         connection.rename_table('test_table', new_table_name)
 
