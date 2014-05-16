@@ -1,5 +1,5 @@
 class PgAuditLog::Entry < ActiveRecord::Base
-  TABLE_NAME = 'audit_log'
+  TABLE_NAME = 'audit_log'.freeze
   self.table_name = TABLE_NAME
 
   class CannotDeleteError < StandardError
