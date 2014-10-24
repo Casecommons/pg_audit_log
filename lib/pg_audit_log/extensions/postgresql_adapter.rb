@@ -14,6 +14,7 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     create_table_without_auditing(table_name, options, &block)
     unless options[:temporary] ||
       PgAuditLog::IGNORED_TABLES.include?(table_name) ||
+      PgAuditLog::IGNORED_TABLES.any? { |table| table =~ table_name if table.is_a? Regexp } ||
       PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
       PgAuditLog::Triggers.create_for_table(table_name)
     end

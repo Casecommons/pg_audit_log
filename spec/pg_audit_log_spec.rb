@@ -338,5 +338,14 @@ describe PgAuditLog do
         connection.drop_table('ignored_table')
       end
     end
+
+    context "when creating one of those tables that matches a regexp" do
+      it "should not automatically create a trigger for it" do
+        PgAuditLog::IGNORED_TABLES << /ignored_table/
+        connection.create_table('second_ignored_table')
+        PgAuditLog::Triggers.tables_with_triggers.should_not include('second_ignored_table')
+        connection.drop_table('second_ignored_table')
+      end
+    end
   end
 end
