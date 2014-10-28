@@ -34,23 +34,26 @@ describe PgAuditLog do
 
     describe "on create" do
       context "the audit log record with a primary key" do
-        before do
-          AuditedModel.create!(attributes)
-        end
-
         subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
-        it { should be }
-        its(:occurred_at) { should be }
-        its(:table_name) { should == AuditedModel.table_name }
-        its(:field_name) { should == 'str' }
-        its(:primary_key) { should == AuditedModel.last.id.to_s }
-        its(:operation) { should == 'INSERT' }
-
-        context "when a user is present" do
+        context "recording changes" do
           before do
+            AuditedModel.create!(attributes)
+          end
+
+          it { should be }
+          its(:occurred_at) { should be }
+          its(:table_name) { should == AuditedModel.table_name }
+          its(:field_name) { should == 'str' }
+          its(:primary_key) { should == AuditedModel.last.id.to_s }
+          its(:operation) { should == 'INSERT' }
+        end
+
+        context "when a user is present, having just been changed" do
+          before do
+            record = AuditedModel.new
             Thread.current[:current_user] = double('User', :id => 1, :unique_name => 'my current user')
-            AuditedModel.create!
+            ActiveRecord::Persistence.instance_method(:save).bind(record).call # call save without transaction
           end
 
           after { Thread.current[:current_user] = nil }
@@ -60,11 +63,15 @@ describe PgAuditLog do
         end
 
         context "when no user is present" do
+          before { AuditedModel.create!(attributes) }
+
           its(:user_id) { should == -1 }
           its(:user_unique_name) { should == 'UNKNOWN' }
         end
 
         it "captures all new values for all fields" do
+          AuditedModel.create!(attributes)
+
           attributes.each do |field_name, value|
             entry = PgAuditLog::Entry.where(:field_name => field_name).last
             if field_name == :dt
@@ -94,6 +101,20 @@ describe PgAuditLog do
       context "the audit log record with a primary key" do
         before do
           @model = AuditedModel.create!(attributes)
+        end
+
+        context "when a user is present, having just been changed" do
+          subject { PgAuditLog::Entry.where(:field_name => 'str').last }
+          before do
+            Thread.current[:current_user] = double('User', :id => 1, :unique_name => 'my current user')
+            @model.str = 'foobarbaz'
+            # @model.class.connection.execute "select * from #{AuditedModel.table_name}"
+            ActiveRecord::Persistence.instance_method(:save).bind(@model).call # call save without transaction
+          end
+          after { Thread.current[:current_user] = nil }
+
+          its(:user_id) { should == 1 }
+          its(:user_unique_name) { should == 'my current user' }
         end
 
         context "when going from a value to a another value" do
@@ -205,6 +226,13 @@ describe PgAuditLog do
             entry.field_value_new.should be_nil
           end
         end
+      end
+
+      it "records with the correct user after just changing the user" do
+        record = AuditedModel.create!
+        Thread.current[:current_user] = double('User', :id => 1, :unique_name => 'my current user')
+        record.delete
+        expect(PgAuditLog::Entry.order(:occurred_at).last.user_id).to eq 1
       end
 
       context "the audit log record without a primary key" do

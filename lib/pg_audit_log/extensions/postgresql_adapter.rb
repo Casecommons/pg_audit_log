@@ -62,18 +62,32 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   alias_method_chain :reconnect!, :pg_audit_log
 
   def execute_with_pg_audit_log(sql, name = nil)
-    conn = execute_without_pg_audit_log(sql, name = nil)
     set_audit_user_id_and_name
+    conn = execute_without_pg_audit_log(sql, name = nil)
     conn
   end
   alias_method_chain :execute, :pg_audit_log
 
   def exec_query_with_pg_audit_log(sql, name = 'SQL', binds = [])
-    conn = exec_query_without_pg_audit_log(sql, name, binds)
     set_audit_user_id_and_name
+    conn = exec_query_without_pg_audit_log(sql, name, binds)
     conn
   end
   alias_method_chain :exec_query, :pg_audit_log
+
+  def exec_update_with_pg_audit_log(sql, name = 'SQL', binds = [])
+    set_audit_user_id_and_name
+    conn = exec_update_without_pg_audit_log(sql, name, binds)
+    conn
+  end
+  alias_method_chain :exec_update, :pg_audit_log
+
+  def exec_delete_with_pg_audit_log(sql, name = 'SQL', binds = [])
+    set_audit_user_id_and_name
+    conn = exec_delete_without_pg_audit_log(sql, name, binds)
+    conn
+  end
+  alias_method_chain :exec_delete, :pg_audit_log
 
   private
 
