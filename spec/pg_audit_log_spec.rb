@@ -27,6 +27,7 @@ describe PgAuditLog do
     end
 
     after do
+      Thread.current[:current_user] = nil
       PgAuditLog::Entry.connection.execute("TRUNCATE #{PgAuditLog::Entry.quoted_table_name}")
     end
 
@@ -55,8 +56,6 @@ describe PgAuditLog do
             Thread.current[:current_user] = double('User', :id => 1, :unique_name => 'my current user')
             ActiveRecord::Persistence.instance_method(:save).bind(record).call # call save without transaction
           end
-
-          after { Thread.current[:current_user] = nil }
 
           its(:user_id) { should == 1 }
           its(:user_unique_name) { should == 'my current user' }
@@ -111,7 +110,6 @@ describe PgAuditLog do
             # @model.class.connection.execute "select * from #{AuditedModel.table_name}"
             ActiveRecord::Persistence.instance_method(:save).bind(@model).call # call save without transaction
           end
-          after { Thread.current[:current_user] = nil }
 
           its(:user_id) { should == 1 }
           its(:user_unique_name) { should == 'my current user' }
