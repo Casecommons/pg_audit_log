@@ -13,9 +13,9 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   def create_table_with_auditing(table_name, options = {}, &block)
     create_table_without_auditing(table_name, options, &block)
     unless options[:temporary] ||
-      PgAuditLog::IGNORED_TABLES.include?(table_name) ||
-      PgAuditLog::IGNORED_TABLES.any? { |table| table =~ table_name if table.is_a? Regexp } ||
-      PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
+        PgAuditLog::IGNORED_TABLES.include?(table_name) ||
+        PgAuditLog::IGNORED_TABLES.any? { |table| table =~ table_name if table.is_a? Regexp } ||
+        PgAuditLog::Triggers.tables_with_triggers.include?(table_name)
       PgAuditLog::Triggers.create_for_table(table_name)
     end
   end
@@ -26,7 +26,9 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
       PgAuditLog::Triggers.drop_for_table(table_name)
     end
     rename_table_without_auditing(table_name, new_name)
-    unless PgAuditLog::IGNORED_TABLES.include?(table_name) || PgAuditLog::Triggers.tables_with_triggers.include?(new_name)
+    unless PgAuditLog::IGNORED_TABLES.include?(table_name) ||
+        PgAuditLog::IGNORED_TABLES.any? { |table| table =~ table_name if table.is_a? Regexp } ||
+        PgAuditLog::Triggers.tables_with_triggers.include?(new_name)
       PgAuditLog::Triggers.create_for_table(new_name)
     end
   end

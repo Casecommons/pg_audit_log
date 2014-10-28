@@ -279,6 +279,21 @@ describe PgAuditLog do
 
         connection.drop_table(new_table_name) rescue nil
       end
+
+      context "and the new table name is ignored on the ignore list" do
+        it "should not create a new trigger" do
+          PgAuditLog::IGNORED_TABLES << /ignored_table/
+          new_table_name = "ignored_table_#{Time.current.to_i}"
+          connection.create_table('ignored_table')
+          connection.rename_table('ignored_table', new_table_name)
+
+          trigger_names.should_not include('audit_ignored_table')
+          trigger_names.should_not include("audit_#{new_table_name}")
+          PgAuditLog::Triggers.tables_with_triggers.should_not include(new_table_name)
+
+          connection.drop_table(new_table_name) rescue nil
+        end
+      end
     end
   end
 
