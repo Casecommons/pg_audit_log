@@ -21,10 +21,6 @@ All SQL `INSERT`s, `UPDATE`s, and `DELETE`s will be captured. Record columns tha
 
         rails generate pg_audit_log:install
 
-- Install the PostgreSQL function and triggers for your project:
-
-        rake pg_audit_log:install
-
 ## Usage
 
 The PgAuditLog::Entry ActiveRecord model represents a single entry in the audit log table. Each entry represents a single change to a single field of a record in a table. So if you change 3 columns of a record, that will generate 3 corresponding PgAuditLog::Entry records.
@@ -33,6 +29,7 @@ You can see the SQL it injects on every query by running with LOG_AUDIT_SQL
 
 ### Migrations
 
+Running `rake db:migrate` will install the audit log table, as well as the triggers and functions needed for `pg_audit_log` to work properly.
 TODO
 
 ### schema.rb and development_structure.sql
