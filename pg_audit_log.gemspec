@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name        = 'pg_audit_log'
   spec.version     = PgAuditLog::VERSION
   spec.authors     = ['Case Commons, LLC']
-  spec.email       = ['casecommons-dev@googlegroups.com']
+  spec.email       = ['casecommons-dev@googlegroups.com', 'andrew@johnandrewmarshall.com']
   spec.homepage    = 'https://github.com/Casecommons/pg_audit_log'
   spec.summary     = %q{PostgreSQL-only database-level audit logging of all databases changes.}
   spec.description = %q{A completely transparent audit logging component for your application using a stored procedure and triggers. Comes with specs for your project and a rake task to generate the reverse SQL to undo changes logged.}
