@@ -7,9 +7,9 @@ before_script:
   - psql -c 'CREATE DATABASE pg_audit_log_test;' -U postgres
 
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.1
+  - "1.9"
+  - "2.0"
+  - "2.1"
   #- jruby-19mode
   - rbx-2.2
 
