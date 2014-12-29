@@ -1,4 +1,4 @@
-### 0.6.4
+### 0.6.5
 
 - Introduce changelog.
 - Support Rails 4.2 (no code change, dependency requirement bump only).
