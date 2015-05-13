@@ -11,7 +11,7 @@ module PgAuditLog
 
       def install
         directory "lib/tasks"
-        migration_template "migration.rb", "db/migrate/install_pg_audit_log"
+        migration_template "migration.rb", "db/migrate/install_pg_audit_log.rb"
       end
     end
   end
