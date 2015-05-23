@@ -42,12 +42,32 @@ describe PgAuditLog do
             AuditedModel.create!(attributes)
           end
 
-          it { should be }
-          its(:occurred_at) { should be }
-          its(:table_name) { should == AuditedModel.table_name }
-          its(:field_name) { should == 'str' }
-          its(:primary_key) { should == AuditedModel.last.id.to_s }
-          its(:operation) { should == 'INSERT' }
+          it { is_expected.to be }
+
+          describe '#occurred_at' do
+            subject { super().occurred_at }
+            it { is_expected.to be }
+          end
+
+          describe '#table_name' do
+            subject { super().table_name }
+            it { is_expected.to eq(AuditedModel.table_name) }
+          end
+
+          describe '#field_name' do
+            subject { super().field_name }
+            it { is_expected.to eq('str') }
+          end
+
+          describe '#primary_key' do
+            subject { super().primary_key }
+            it { is_expected.to eq(AuditedModel.last.id.to_s) }
+          end
+
+          describe '#operation' do
+            subject { super().operation }
+            it { is_expected.to eq('INSERT') }
+          end
         end
 
         context "when a user is present, having just been changed" do
@@ -57,15 +77,29 @@ describe PgAuditLog do
             ActiveRecord::Persistence.instance_method(:save).bind(record).call # call save without transaction
           end
 
-          its(:user_id) { should == 1 }
-          its(:user_unique_name) { should == 'my current user' }
+          describe '#user_id' do
+            subject { super().user_id }
+            it { is_expected.to eq(1) }
+          end
+
+          describe '#user_unique_name' do
+            subject { super().user_unique_name }
+            it { is_expected.to eq('my current user') }
+          end
         end
 
         context "when no user is present" do
           before { AuditedModel.create!(attributes) }
 
-          its(:user_id) { should == -1 }
-          its(:user_unique_name) { should == 'UNKNOWN' }
+          describe '#user_id' do
+            subject { super().user_id }
+            it { is_expected.to eq(-1) }
+          end
+
+          describe '#user_unique_name' do
+            subject { super().user_unique_name }
+            it { is_expected.to eq('UNKNOWN') }
+          end
         end
 
         it "captures all new values for all fields" do
@@ -74,11 +108,11 @@ describe PgAuditLog do
           attributes.each do |field_name, value|
             entry = PgAuditLog::Entry.where(:field_name => field_name).last
             if field_name == :dt
-              entry.field_value_new.should == value.strftime("%Y-%m-%d %H:%M:%S")
+              expect(entry.field_value_new).to eq(value.strftime("%Y-%m-%d %H:%M:%S"))
             else
-              entry.field_value_new.should == value.to_s
+              expect(entry.field_value_new).to eq(value.to_s)
             end
-            entry.field_value_old.should be_nil
+            expect(entry.field_value_old).to be_nil
           end
         end
       end
@@ -90,9 +124,17 @@ describe PgAuditLog do
 
         subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
-        it { should be }
-        its(:field_name) { should == 'str' }
-        its(:primary_key) { should be_nil }
+        it { is_expected.to be }
+
+        describe '#field_name' do
+          subject { super().field_name }
+          it { is_expected.to eq('str') }
+        end
+
+        describe '#primary_key' do
+          subject { super().primary_key }
+          it { is_expected.to be_nil }
+        end
       end
     end
 
@@ -111,17 +153,35 @@ describe PgAuditLog do
             ActiveRecord::Persistence.instance_method(:save).bind(@model).call # call save without transaction
           end
 
-          its(:user_id) { should == 1 }
-          its(:user_unique_name) { should == 'my current user' }
+          describe '#user_id' do
+            subject { super().user_id }
+            it { is_expected.to eq(1) }
+          end
+
+          describe '#user_unique_name' do
+            subject { super().user_unique_name }
+            it { is_expected.to eq('my current user') }
+          end
         end
 
         context "when going from a value to a another value" do
           before { @model.update_attributes!(:str => 'bar') }
           subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
-          its(:operation) { should == 'UPDATE' }
-          its(:field_value_new) { should == 'bar' }
-          its(:field_value_old) { should == 'foo' }
+          describe '#operation' do
+            subject { super().operation }
+            it { is_expected.to eq('UPDATE') }
+          end
+
+          describe '#field_value_new' do
+            subject { super().field_value_new }
+            it { is_expected.to eq('bar') }
+          end
+
+          describe '#field_value_old' do
+            subject { super().field_value_old }
+            it { is_expected.to eq('foo') }
+          end
         end
 
         context "when going from nil to a value" do
@@ -129,23 +189,37 @@ describe PgAuditLog do
           before { @model.update_attributes!(:txt => 'baz') }
           subject { PgAuditLog::Entry.where(:field_name => 'txt').last }
 
-          its(:field_value_new) { should == 'baz' }
-          its(:field_value_old) { should be_nil }
+          describe '#field_value_new' do
+            subject { super().field_value_new }
+            it { is_expected.to eq('baz') }
+          end
+
+          describe '#field_value_old' do
+            subject { super().field_value_old }
+            it { is_expected.to be_nil }
+          end
         end
 
         context "when going from a value to nil" do
           before { @model.update_attributes!(:str => nil) }
           subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
-          its(:field_value_new) { should be_nil }
-          its(:field_value_old) { should == 'foo' }
+          describe '#field_value_new' do
+            subject { super().field_value_new }
+            it { is_expected.to be_nil }
+          end
+
+          describe '#field_value_old' do
+            subject { super().field_value_old }
+            it { is_expected.to eq('foo') }
+          end
         end
 
         context "when the value does not change" do
           before { @model.update_attributes!(:str => 'foo') }
           subject { PgAuditLog::Entry.where(:field_name => 'str', :operation => 'UPDATE').last }
 
-          it { should_not be }
+          it { is_expected.not_to be }
         end
 
         context "when the value is nil and does not change" do
@@ -153,7 +227,7 @@ describe PgAuditLog do
           before { @model.update_attributes!(:txt => nil) }
           subject { PgAuditLog::Entry.where(:field_name => 'txt', :operation => 'UPDATE').last }
 
-          it { should_not be }
+          it { is_expected.not_to be }
         end
 
         context "when the value is a boolean" do
@@ -161,8 +235,15 @@ describe PgAuditLog do
             before { @model.update_attributes!(:bool => true) }
             subject { PgAuditLog::Entry.where(:field_name => 'bool', :operation => 'UPDATE').last }
 
-            its(:field_value_new) { should == 'true' }
-            its(:field_value_old) { should be_nil }
+            describe '#field_value_new' do
+              subject { super().field_value_new }
+              it { is_expected.to eq('true') }
+            end
+
+            describe '#field_value_old' do
+              subject { super().field_value_old }
+              it { is_expected.to be_nil }
+            end
           end
 
           context "going from false -> true" do
@@ -172,8 +253,15 @@ describe PgAuditLog do
             end
             subject { PgAuditLog::Entry.where(:field_name => 'bool', :operation => 'UPDATE').last }
 
-            its(:field_value_new) { should == 'true' }
-            its(:field_value_old) { should == 'false' }
+            describe '#field_value_new' do
+              subject { super().field_value_new }
+              it { is_expected.to eq('true') }
+            end
+
+            describe '#field_value_old' do
+              subject { super().field_value_old }
+              it { is_expected.to eq('false') }
+            end
           end
 
           context "going from true -> false" do
@@ -184,8 +272,15 @@ describe PgAuditLog do
             end
             subject { PgAuditLog::Entry.where(:field_name => 'bool', :operation => 'UPDATE').last }
 
-            its(:field_value_new) { should == 'false' }
-            its(:field_value_old) { should == 'true' }
+            describe '#field_value_new' do
+              subject { super().field_value_new }
+              it { is_expected.to eq('false') }
+            end
+
+            describe '#field_value_old' do
+              subject { super().field_value_old }
+              it { is_expected.to eq('true') }
+            end
           end
         end
       end
@@ -198,7 +293,10 @@ describe PgAuditLog do
 
         subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
-        its(:primary_key) { should be_nil }
+        describe '#primary_key' do
+          subject { super().primary_key }
+          it { is_expected.to be_nil }
+        end
       end
     end
 
@@ -211,17 +309,20 @@ describe PgAuditLog do
 
         subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
-        its(:operation) { should == 'DELETE' }
+        describe '#operation' do
+          subject { super().operation }
+          it { is_expected.to eq('DELETE') }
+        end
 
         it "captures all new values for all fields" do
           attributes.each do |field_name, value|
             entry = PgAuditLog::Entry.where(:field_name => field_name).last
             if field_name == :dt
-              entry.field_value_old.should == value.strftime('%Y-%m-%d %H:%M:%S')
+              expect(entry.field_value_old).to eq(value.strftime('%Y-%m-%d %H:%M:%S'))
             else
-              entry.field_value_old.should == value.to_s
+              expect(entry.field_value_old).to eq(value.to_s)
             end
-            entry.field_value_new.should be_nil
+            expect(entry.field_value_new).to be_nil
           end
         end
       end
@@ -241,7 +342,10 @@ describe PgAuditLog do
 
         subject { PgAuditLog::Entry.where(:field_name => 'str').last }
 
-        its(:primary_key) { should be_nil }
+        describe '#primary_key' do
+          subject { super().primary_key }
+          it { is_expected.to be_nil }
+        end
       end
     end
 
@@ -271,9 +375,9 @@ describe PgAuditLog do
 
     describe "when creating the table" do
       it "should automatically create the trigger" do
-        PgAuditLog::Triggers.tables_with_triggers.should_not include('test_table')
+        expect(PgAuditLog::Triggers.tables_with_triggers).not_to include('test_table')
         connection.create_table('test_table')
-        PgAuditLog::Triggers.tables_with_triggers.should include('test_table')
+        expect(PgAuditLog::Triggers.tables_with_triggers).to include('test_table')
       end
     end
 
@@ -281,7 +385,7 @@ describe PgAuditLog do
       it "should automatically drop the trigger" do
         connection.create_table('test_table')
         connection.drop_table('test_table')
-        PgAuditLog::Triggers.tables_with_triggers.should_not include('test_table')
+        expect(PgAuditLog::Triggers.tables_with_triggers).not_to include('test_table')
       end
     end
 
@@ -299,9 +403,9 @@ describe PgAuditLog do
         connection.create_table('test_table')
         connection.rename_table('test_table', new_table_name)
 
-        trigger_names.should_not include('audit_test_table')
-        trigger_names.should include("audit_#{new_table_name}")
-        PgAuditLog::Triggers.tables_with_triggers.should include(new_table_name)
+        expect(trigger_names).not_to include('audit_test_table')
+        expect(trigger_names).to include("audit_#{new_table_name}")
+        expect(PgAuditLog::Triggers.tables_with_triggers).to include(new_table_name)
 
         connection.drop_table(new_table_name) rescue nil
       end
@@ -313,9 +417,9 @@ describe PgAuditLog do
           connection.create_table('ignored_table')
           connection.rename_table('ignored_table', new_table_name)
 
-          trigger_names.should_not include('audit_ignored_table')
-          trigger_names.should_not include("audit_#{new_table_name}")
-          PgAuditLog::Triggers.tables_with_triggers.should_not include(new_table_name)
+          expect(trigger_names).not_to include('audit_ignored_table')
+          expect(trigger_names).not_to include("audit_#{new_table_name}")
+          expect(PgAuditLog::Triggers.tables_with_triggers).not_to include(new_table_name)
 
           connection.drop_table(new_table_name) rescue nil
         end
@@ -327,7 +431,7 @@ describe PgAuditLog do
     context "when creating them" do
       it "should be ignored" do
         connection.create_table('some_temp_table', :temporary => true)
-        PgAuditLog::Triggers.tables_with_triggers.should_not include('some_temp_table')
+        expect(PgAuditLog::Triggers.tables_with_triggers).not_to include('some_temp_table')
         connection.drop_table('some_temp_table')
       end
     end
@@ -336,7 +440,7 @@ describe PgAuditLog do
       it "should be ignored" do
         connection.create_table('some_temp_table', :temporary => true)
         connection.drop_table('some_temp_table')
-        PgAuditLog::Triggers.tables_with_triggers.should_not include('some_temp_table')
+        expect(PgAuditLog::Triggers.tables_with_triggers).not_to include('some_temp_table')
       end
     end
   end
@@ -349,7 +453,7 @@ describe PgAuditLog do
     context "when creating a table" do
       it "should install the function then enable the trigger on the table" do
         connection.create_table('some_more_new_table')
-        PgAuditLog::Triggers.tables_with_triggers.should include('some_more_new_table')
+        expect(PgAuditLog::Triggers.tables_with_triggers).to include('some_more_new_table')
         connection.drop_table('some_more_new_table')
       end
     end
@@ -362,9 +466,9 @@ describe PgAuditLog do
 
     context "when creating a table" do
       it "should install the entry table then enable the trigger on the table" do
-        PgAuditLog::Entry.installed?.should be_false
+        expect(PgAuditLog::Entry.installed?).to be_falsey
         connection.create_table('another_table')
-        PgAuditLog::Entry.installed?.should be_true
+        expect(PgAuditLog::Entry.installed?).to be_truthy
         connection.drop_table('another_table')
       end
     end
@@ -375,7 +479,7 @@ describe PgAuditLog do
       it "should not automatically create a trigger for it" do
         PgAuditLog::IGNORED_TABLES << 'ignored_table'
         connection.create_table('ignored_table')
-        PgAuditLog::Triggers.tables_with_triggers.should_not include('ignored_table')
+        expect(PgAuditLog::Triggers.tables_with_triggers).not_to include('ignored_table')
         connection.drop_table('ignored_table')
       end
     end
@@ -384,7 +488,7 @@ describe PgAuditLog do
       it "should not automatically create a trigger for it" do
         PgAuditLog::IGNORED_TABLES << /ignored_table/
         connection.create_table('second_ignored_table')
-        PgAuditLog::Triggers.tables_with_triggers.should_not include('second_ignored_table')
+        expect(PgAuditLog::Triggers.tables_with_triggers).not_to include('second_ignored_table')
         connection.drop_table('second_ignored_table')
       end
     end

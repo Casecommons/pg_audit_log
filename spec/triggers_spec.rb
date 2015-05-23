@@ -28,23 +28,23 @@ describe PgAuditLog::Triggers do
       PgAuditLog::IGNORED_TABLES << /ignore/
     end
 
-    it { should include(TableWithTriggers.table_name) }
-    it { should include(TableWithoutTriggers.table_name) }
-    it { should_not include(PgAuditLog::Entry.table_name) }
-    it { should_not include(TableToIgnore.table_name) }
+    it { is_expected.to include(TableWithTriggers.table_name) }
+    it { is_expected.to include(TableWithoutTriggers.table_name) }
+    it { is_expected.not_to include(PgAuditLog::Entry.table_name) }
+    it { is_expected.not_to include(TableToIgnore.table_name) }
   end
 
   describe ".tables_with_triggers" do
     it "should return an array of all tables that do have an audit trigger installed" do
-      PgAuditLog::Triggers.tables_with_triggers.should include(TableWithTriggers.table_name)
-      PgAuditLog::Triggers.tables_with_triggers.should_not include(TableWithoutTriggers.table_name)
+      expect(PgAuditLog::Triggers.tables_with_triggers).to include(TableWithTriggers.table_name)
+      expect(PgAuditLog::Triggers.tables_with_triggers).not_to include(TableWithoutTriggers.table_name)
     end
   end
 
   describe ".tables_without_triggers" do
     it "should return an array of all tables that do not have an audit trigger installed" do
-      PgAuditLog::Triggers.tables_without_triggers.should_not include(TableWithTriggers.table_name)
-      PgAuditLog::Triggers.tables_without_triggers.should include(TableWithoutTriggers.table_name)
+      expect(PgAuditLog::Triggers.tables_without_triggers).not_to include(TableWithTriggers.table_name)
+      expect(PgAuditLog::Triggers.tables_without_triggers).to include(TableWithoutTriggers.table_name)
     end
   end
 
@@ -55,17 +55,17 @@ describe PgAuditLog::Triggers do
 
     describe ".install" do
       it "should work" do
-        ->{
+        expect{
           PgAuditLog::Triggers.install
-        }.should_not raise_error
+        }.not_to raise_error
       end
     end
 
     describe ".uninstall" do
       it "should work" do
-        ->{
+        expect{
           PgAuditLog::Triggers.uninstall
-        }.should_not raise_error
+        }.not_to raise_error
       end
     end
 
@@ -74,24 +74,24 @@ describe PgAuditLog::Triggers do
   context "when triggers are installed" do
     describe ".install" do
       it "should work" do
-        ->{
+        expect{
           PgAuditLog::Triggers.install
-        }.should_not raise_error
+        }.not_to raise_error
       end
     end
     describe ".uninstall" do
       it "should work" do
-        ->{
+        expect{
           PgAuditLog::Triggers.uninstall
-        }.should_not raise_error
+        }.not_to raise_error
       end
     end
 
     describe ".enable" do
       it "should not blow up" do
-        ->{
+        expect{
           PgAuditLog::Triggers.enable
-        }.should_not raise_error
+        }.not_to raise_error
       end
 
       it "should fire the audit" do
@@ -104,9 +104,9 @@ describe PgAuditLog::Triggers do
 
     describe ".disable" do
       it "should not blow up" do
-        ->{
+        expect{
           PgAuditLog::Triggers.disable
-        }.should_not raise_error
+        }.not_to raise_error
       end
 
       it "should not fire the audit" do
@@ -130,17 +130,17 @@ describe PgAuditLog::Triggers do
         expect {
           TableWithTriggers.create!
         }.to change(PgAuditLog::Entry, :count)
-        PgAuditLog::Entry.last.user_id.should == -1
+        expect(PgAuditLog::Entry.last.user_id).to eq(-1)
       end
     end
 
     describe ".create_for_table" do
       context "for a table that already has a trigger" do
         it "should not blow up" do
-          PgAuditLog::Triggers.tables_with_triggers.should include(TableWithTriggers.table_name)
-          ->{
+          expect(PgAuditLog::Triggers.tables_with_triggers).to include(TableWithTriggers.table_name)
+          expect{
             PgAuditLog::Triggers.create_for_table(TableWithTriggers.table_name)
-          }.should_not raise_error
+          }.not_to raise_error
         end
       end
     end
@@ -149,9 +149,9 @@ describe PgAuditLog::Triggers do
       context "for a table that has no trigger" do
         it "should not blow up" do
           PgAuditLog::Triggers.drop_for_table(TableWithTriggers.table_name)
-          ->{
+          expect{
             PgAuditLog::Triggers.drop_for_table(TableWithTriggers.table_name)
-          }.should_not raise_error
+          }.not_to raise_error
         end
       end
     end
