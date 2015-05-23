@@ -1,6 +1,6 @@
 # pg_audit_log
 
-[![Build Status](https://secure.travis-ci.org/Casecommons/pg_audit_log.png?branch=master)](https://travis-ci.org/Casecommons/pg_audit_log)
+[![Build Status](https://secure.travis-ci.org/Casecommons/pg_audit_log.svg?branch=master)](https://travis-ci.org/Casecommons/pg_audit_log)
 [![Code Climate](https://img.shields.io/codeclimate/github/Casecommons/pg_audit_log.svg?style=flat)](https://codeclimate.com/github/Casecommons/pg_audit_log)
 [![Gem Version](https://img.shields.io/gem/v/pg_audit_log.svg?style=flat)](https://rubygems.org/gems/pg_audit_log)
 
