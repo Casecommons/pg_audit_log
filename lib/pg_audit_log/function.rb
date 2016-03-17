@@ -81,6 +81,8 @@ module PgAuditLog
                 column_name := col.column_name;
                 IF TG_RELNAME = '#{users_table_name}' AND column_name = '#{users_access_column}' THEN
                   NULL;
+                ELSIF column_name = 'created_at' OR column_name = 'updated_at' THEN
+                  NULL;
                 ELSE
                   IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
                     EXECUTE 'SELECT CAST($1 . '|| column_name ||' AS TEXT)' INTO new_value USING NEW;
