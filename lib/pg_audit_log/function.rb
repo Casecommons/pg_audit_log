@@ -45,7 +45,6 @@ module PgAuditLog
 
       def install
         execute <<-SQL
-        CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
         CREATE OR REPLACE FUNCTION #{name}() RETURNS trigger
         LANGUAGE plpgsql
         AS $_$
