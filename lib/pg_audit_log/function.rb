@@ -75,7 +75,7 @@ module PgAuditLog
               INTO primary_key_column USING TG_RELNAME;
               primary_key_value := NULL;
 
-              FOR col IN SELECT * FROM information_schema.columns WHERE table_name = TG_RELNAME LOOP
+              FOR col IN SELECT * FROM information_schema.columns WHERE table_name = TG_RELNAME AND table_schema = 'public' LOOP
                 new_value := NULL;
                 old_value := NULL;
                 column_name := col.column_name;
