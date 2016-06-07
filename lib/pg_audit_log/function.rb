@@ -44,7 +44,7 @@ module PgAuditLog
       end
 
       def install(only_audit_schema=nil)
-        schema_restriction = only_audit_schema ? "AND TABLE_schema = '#{only_audit_schema}'" : ""
+        schema_restriction = only_audit_schema ? "AND table_schema = '#{only_audit_schema}'" : ""
         execute <<-SQL
         CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
         CREATE OR REPLACE FUNCTION #{name}() RETURNS trigger
