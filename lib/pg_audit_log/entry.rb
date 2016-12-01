@@ -59,7 +59,11 @@ class PgAuditLog::Entry < ActiveRecord::Base
             EXECUTE 'SELECT ($1 +  INTERVAL ''1 MONTH'')' INTO month_end USING month_start;
             create_table_sql :=  'CREATE TABLE ' || tablename || ' ( CHECK ( date(occurred_at) >= DATE ''' || month_start || ''' AND date(occurred_at) < DATE ''' ||
               month_end || ''' ) ) INHERITS (#{self.table_name})';
-            EXECUTE create_table_sql;
+            BEGIN
+              EXECUTE create_table_sql;
+            EXCEPTION WHEN duplicate_table THEN
+              -- do nothing
+            END;
             EXECUTE 'CREATE INDEX ' || tablename || '_occurred_at ON ' || tablename || ' (date(occurred_at))';
             EXECUTE insert_sql USING NEW;
             RETURN NULL;
