@@ -8,19 +8,21 @@ before_script:
   - psql -c 'CREATE DATABASE pg_audit_log_test;' -U postgres
 
 rvm:
-  - "1.9"
-  - "2.0"
-  - "2.1"
-  - "2.2"
-  #- jruby-19mode
-  - rbx-2.2
+  - "2.1.10"
+  - "2.2.6"
+  - "2.3.3"
+  - "2.4.1"
 
 env:
   - RAILS_VERSION="~> 4.2.0"
-  - RAILS_VERSION="~> 4.1.0"
-  - RAILS_VERSION="~> 4.0.0"
-  - RAILS_VERSION="~> 3.2.0"
+  - RAILS_VERSION="~> 5.0.0"
+  - RAILS_BRANCH="master"
 
 matrix:
   allow_failures:
     - env: RAILS_BRANCH="master"
+  exclude:
+    - rvm: "2.1.10"
+      env: RAILS_VERSION="~> 5.0.0"
+    - rvm: "2.1.10"
+      env: RAILS_BRANCH="master"
