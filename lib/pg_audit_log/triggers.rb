@@ -49,18 +49,21 @@ module PgAuditLog
       end
 
       def enable
+        @disabled = false
         connection.set_user_id(nil)
       end
 
       def disable
+        @disabled = true
         connection.set_user_id(PgAuditLog::Function::DISABLED_USER)
       end
 
       def without_triggers
-        disable
+        was_disabled = @disabled
+        disable unless was_disabled
         yield
       ensure
-        enable
+        enable unless was_disabled
       end
 
       def create_for_table(table_name)

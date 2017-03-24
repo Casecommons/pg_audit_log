@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe PgAuditLog::Triggers do
   before :each do
+    PgAuditLog::Triggers.enable
     PgAuditLog::Triggers.uninstall rescue nil
   end
 
@@ -131,6 +132,20 @@ describe PgAuditLog::Triggers do
           TableWithTriggers.create!
         }.to change(PgAuditLog::Entry, :count)
         expect(PgAuditLog::Entry.last.user_id).to eq(-1)
+      end
+
+      context 'when nested' do
+        it 'does not enable prematurely' do
+          expect {
+            PgAuditLog::Triggers.without_triggers do
+              TableWithTriggers.create!
+              PgAuditLog::Triggers.without_triggers do
+                TableWithTriggers.create!
+              end
+              TableWithTriggers.create!
+            end
+          }.to_not change(PgAuditLog::Entry, :count)
+        end
       end
     end
 
