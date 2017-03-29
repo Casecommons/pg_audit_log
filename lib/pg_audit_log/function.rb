@@ -45,7 +45,6 @@ module PgAuditLog
 
       def install
         execute <<-SQL
-        CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
         CREATE OR REPLACE FUNCTION #{name}() RETURNS trigger
         LANGUAGE plpgsql
         AS $_$
@@ -80,6 +79,8 @@ module PgAuditLog
                 old_value := NULL;
                 column_name := col.column_name;
                 IF TG_RELNAME = '#{users_table_name}' AND column_name = '#{users_access_column}' THEN
+                  NULL;
+                ELSIF column_name = 'created_at' OR column_name = 'updated_at' THEN
                   NULL;
                 ELSE
                   IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
