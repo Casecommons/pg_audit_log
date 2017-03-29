@@ -7,7 +7,7 @@ namespace :pg_audit_log do
     end
 
     puts "Installing audit_changes() function..."
-    PgAuditLog::Function.install
+    PgAuditLog::Function.install(ENV['PG_AUDIT_LOG_SCHEMA'].presence)
 
     puts "Installing all audit log triggers... "
     PgAuditLog::Triggers.install

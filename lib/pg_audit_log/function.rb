@@ -43,7 +43,8 @@ module PgAuditLog
         end
       end
 
-      def install
+      def install(only_audit_schema=nil)
+        schema_restriction = only_audit_schema ? "AND table_schema = '#{only_audit_schema}'" : ""
         execute <<-SQL
         CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
         CREATE OR REPLACE FUNCTION #{name}() RETURNS trigger
@@ -75,7 +76,7 @@ module PgAuditLog
               INTO primary_key_column USING TG_RELNAME;
               primary_key_value := NULL;
 
-              FOR col IN SELECT * FROM information_schema.columns WHERE table_name = TG_RELNAME LOOP
+              FOR col IN SELECT * FROM information_schema.columns WHERE table_name = TG_RELNAME #{schema_restriction} LOOP
                 new_value := NULL;
                 old_value := NULL;
                 column_name := col.column_name;
