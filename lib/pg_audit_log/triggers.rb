@@ -72,7 +72,7 @@ module PgAuditLog
         return if tables_with_triggers.include?(table_name)
         execute <<-SQL
           CREATE TRIGGER #{trigger_name_for_table(table_name)}
-          AFTER INSERT OR UPDATE OR DELETE
+          AFTER #{AUDITED_EVENTS.join(' OR ')}
           ON #{table_name}
           FOR EACH ROW
           EXECUTE PROCEDURE #{PgAuditLog::Function.name}()
