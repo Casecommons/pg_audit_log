@@ -4,6 +4,12 @@ module PgAuditLog
     'sessions'.freeze,
     'schema_migrations'.freeze,
   ]
+
+  AUDITED_EVENTS = %w[
+    INSERT
+    UPDATE
+    DELETE
+  ]
 end
 
 require 'active_record'
