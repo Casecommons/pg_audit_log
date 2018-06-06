@@ -13,10 +13,6 @@ All SQL `INSERT`s, `UPDATE`s, and `DELETE`s will be captured. Record columns tha
 
 ## Installation
 
-- First, enable plpgsql langauges in your postgresql instance. Execute the following as a superuser in postgres make sure your database has plpgsql enabled:
-
-        CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;
-
 - Generate the appropriate Rails files:
 
         rails generate pg_audit_log:install
