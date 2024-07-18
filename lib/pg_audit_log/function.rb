@@ -37,9 +37,9 @@ module PgAuditLog
 
       def user_unique_name_temporary_function(username)
         if pg_audit_log_old_style_user_id
-          "SET audit.user_unique_name = '#{PGconn.escape_bytea(username)}';"
+          "SET audit.user_unique_name = '#{PG::Connection.escape_bytea(username)}';"
         else
-          "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar AS $_$ SELECT '#{PGconn.escape_bytea(username)}'::varchar $_$ LANGUAGE SQL STABLE;"
+          "CREATE OR REPLACE FUNCTION pg_temp.pg_audit_log_user_unique_name() RETURNS varchar AS $_$ SELECT '#{PG::Connection.escape_bytea(username)}'::varchar $_$ LANGUAGE SQL STABLE;"
         end
       end
 
