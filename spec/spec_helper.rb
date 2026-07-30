@@ -13,7 +13,7 @@ begin
   })
   connection = ActiveRecord::Base.connection
   connection.execute('SELECT 1')
-rescue PGError => e
+rescue PG::Error => e
   puts '-' * 80
   puts 'Unable to connect to database.  Please run:'
   puts

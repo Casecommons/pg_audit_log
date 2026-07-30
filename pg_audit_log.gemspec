@@ -24,4 +24,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rspec-rails'
   spec.add_development_dependency 'with_model', '>= 0.1.3'
+  # Required by Rails LTS 5.2 when running on Ruby 3+
+  spec.add_development_dependency 'ruby3-backward-compatibility', '~> 1.1'
 end
